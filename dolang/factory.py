@@ -52,10 +52,11 @@ def stack_arguments(ff: FlatFunctionFactory, varname: str = 'v'):
 def substitute_preamble(ff: FlatFunctionFactory):
     import dolang
     import copy
+    from .symbolic import NameSubstituter
     pr = copy.copy(ff.preamble)
     for k in pr.keys():
         pr[k] = dolang.parse_string(pr[k]).value
-    st = SubsTransformer(pr)
+    st = NameSubstituter(pr)
     dd = copy.copy(ff.content)
     for k in dd.keys():
         eq = dolang.parse_string(dd[k]).value

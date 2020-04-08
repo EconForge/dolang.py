@@ -327,6 +327,6 @@ if __name__ == "__main__":
     s = '(a + w_1__y)/2 + 1'
     s =  "-(1+2)"
     s = "a*x(2) + b*y(-1)"
-    print( py2tex(['x','y'], s) )
+    print( expr2tex(['x','y'], s) )
     eq = "l = a*x(2) + b*y(-1)"
     print( eq2tex(['x','y'], eq))
