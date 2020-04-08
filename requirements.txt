@@ -1,5 +1,5 @@
 numba
 numpy
 sympy
-yaml
+pyyaml
 ruamel.yaml
