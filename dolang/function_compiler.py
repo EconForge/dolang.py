@@ -6,16 +6,15 @@ from dolang.factory import FlatFunctionFactory
 from dolang.symbolic import parse_string
 from dolang.codegen import to_source
 
+import sys
 
 def compile_factory(fff: FlatFunctionFactory):
-
     arguments = [*fff.arguments.keys()]
     funname = fff.funname
 
     unpacking = []
     for i, (arg_group_name, arg_group) in enumerate(fff.arguments.items()):
         for pos, sym in enumerate(arg_group):
-
             rhs = Subscript(value=Name(id=arg_group_name, ctx=Load()),
                             slice=Index(Num(pos)), ctx=Load())
             val = Assign(targets=[Name(id=sym, ctx=Store())], value=rhs)
@@ -39,18 +38,24 @@ def compile_factory(fff: FlatFunctionFactory):
                                          slice=Index(Num(n)), ctx=Store())], value=Name(id=lhs, ctx=Load()))
         body.append(line)
 
-    f = FunctionDef(name=funname,
-                    args=ast_arguments(args=[arg(arg=a) for a in arguments] + [arg(arg='out')],
-                                       vararg=None, kwarg=None, kwonlyargs=[], kw_defaults=[], defaults=[]),
-                    body=unpacking + body, decorator_list=[])
+    if sys.version_info >= (3, 8, 0):
+        f = FunctionDef(name=funname,
+                        args=ast_arguments(posonlyargs=[], args=[arg(arg=a) for a in arguments] + [arg(arg='out')],
+                                           vararg=None, kwarg=None, kwonlyargs=[], kw_defaults=[], defaults=[]),
+                        body=unpacking + body, decorator_list=[])
+        mod = Module(body=[f], type_ignores=[])
+    else:
+        f = FunctionDef(name=funname,
+                        args=ast_arguments(args=[arg(arg=a) for a in arguments] + [arg(arg='out')],
+                                           vararg=None, kwarg=None, kwonlyargs=[], kw_defaults=[], defaults=[]),
+                        body=unpacking + body, decorator_list=[])
+        mod = Module(body=[f])
 
-    mod = Module(body=[f])
+
     mmod = ast.fix_missing_locations(mod)
     return mmod
 
-
 def make_method_from_factory(fff: FlatFunctionFactory, vectorize=True, use_file=False, debug=False):
-
     mod = compile_factory(fff)
 
     if debug:
@@ -84,7 +89,6 @@ def make_method_from_factory(fff: FlatFunctionFactory, vectorize=True, use_file=
 
 
 def eval_ast(mod):
-
     context = {}
 
     import numpy
