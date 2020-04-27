@@ -1,5 +1,0 @@
-numba
-numpy
-sympy
-pyyaml
-ruamel.yaml
