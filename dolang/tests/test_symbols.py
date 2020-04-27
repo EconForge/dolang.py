@@ -1,4 +1,5 @@
 from dolang.symbols import Symbol
+import yaml
 
 class bcolors:
     HEADER = '\033[95m'
@@ -11,8 +12,7 @@ class bcolors:
     UNDERLINE = '\033[4m'
 
 
-import yaml
-txt = yaml.load(open("tests/symbols.yaml"))
+txt = yaml.safe_load(open("tests/symbols.yaml"))
 
 summary = []
 for short_sym, long_sym in txt['symbols'].items():

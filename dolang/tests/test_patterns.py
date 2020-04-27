@@ -12,7 +12,7 @@ class bcolors:
     BOLD = '\033[1m'
     UNDERLINE = '\033[4m'
 
-tests = yaml.load(open('tests/patterns.yaml'))
+tests = yaml.safe_load(open('tests/patterns.yaml'))
 
 pattern_tests = tests['patterns']
 
