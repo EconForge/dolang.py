@@ -26,7 +26,7 @@ def test_compiler():
     import numpy as np
     out = np.array([0.3, 0.1])
 
-    fun([0.1, 0.2], [10], [0.5, 0.3], out)
+    fun(np.array([0.1, 0.2]), np.array([10]), np.array([0.5, 0.3]), out)
 
     print( abs(out[0] - 4.45168907)<1e-8 )
     print( abs(out[1] - 8.2)<1e-8 )
