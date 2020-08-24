@@ -11,6 +11,7 @@ numba = "^0.49.0"
 numpy = "^1.18.3"
 tempita = "^0.5.2"
 sympy = "^1.5.1"
+lark-parser = "^0.9.0"
 
 [tool.poetry.dev-dependencies]
 pyyaml = "^5.3.1"
