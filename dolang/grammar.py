@@ -1,70 +1,19 @@
-from typing import Tuple
 import lark
-from lark import Tree, Token
-from lark import Visitor
-from lark import Transformer
+from lark import Tree, Token, Visitor, Transformer
 from lark.visitors import Interpreter
 
 from functools import wraps
 
-from typing import Union
+from typing import Tuple, Dict, Set, Union
 Expression = Union[Tree, Token]
 
-from typing import Set
 from dataclasses import dataclass
 
-@dataclass
-class SymbolList(dict):
-    variables: Set[Tuple[str, int]]
-    parameters: Set[str]
-    functions: Set[str]
-
-
-class Printer(Interpreter):
-    def add(self, tree):
-        if len(tree.children) ==1:
-            return "ERROR"
-        a = self.visit(tree.children[0])
-        b = self.visit(tree.children[1])
-        return f"{a} + {b}"
-    def sub(self, tree):
-        if len(tree.children) ==1:
-            return "ERROR"
-        a = self.visit(tree.children[0])
-        b = self.visit(tree.children[1])
-        return f"{a} - ({b})"
-    # def mul(self, tok):
-    #     a = self.visit(tree.children[0])
-    #     b = self.visit(tree.children[1])
-    #     return f"{a} * {b}"
-    def variable(self, tree):
-        # print(args)
-        name = tree.children[0].children[0].value
-        time = int(tree.children[1].children[0].value)
-        if time ==0:
-            ds = "t"
-        elif time>0:
-            ds = "t+"+str(time)
-        elif time<0:
-            ds = "t-"+str(-time)
-        return f"{name}[{ds}]"
-
-    def symbol(self, tree):
-        name = tree.children[0].value
-        return (name)
-    def mul(self, tree):
-        return "****"
-    def call(self, tree):
-        funname = tree.children[0].value
-        args = self.visit( tree.children[1] )
-        return f"{funname}({args})"
-    def exponential(self, tree):
-        arg1 = self.visit(tree.children[0])
-        arg2 = self.visit(tree.children[1])
-        return f"({arg1})^({arg2})"
-    def number(self, tree):
-        return tree.children[0].value
-
+## the following grammar represents equations
+## it recognizes variables indexed as v[t] or v[t+k] where k is an integer
+## for compatibility purposes, it also recognizes v(0) as v[t] unless 
+## v is a prespecified function.
+## later, this compatibility feature will be turned off.
 
 grammar_0 = """
     ?start: equation
@@ -102,6 +51,57 @@ grammar_0 = """
 parser = lark.Lark(grammar_0)
 
 
+# Prints a tree as a string
+# WIP!!! (probably correct, but way too many parentheses)
+class Printer(Interpreter):
+    def add(self, tree):
+        if len(tree.children) ==1:
+            return "ERROR"
+        a = self.visit(tree.children[0])
+        b = self.visit(tree.children[1])
+        return f"{a} + {b}"
+    def sub(self, tree):
+        if len(tree.children) ==1:
+            return "ERROR"
+        a = self.visit(tree.children[0])
+        b = self.visit(tree.children[1])
+        return f"{a} - ({b})"
+    def variable(self, tree):
+        name = tree.children[0].children[0].value
+        try:
+            time = int(tree.children[1].children[0].value)
+        except:
+            time = 0
+        if time ==0:
+            ds = "t"
+        elif time>0:
+            ds = "t+"+str(time)
+        elif time<0:
+            ds = "t-"+str(-time)
+        return f"{name}[{ds}]"
+
+    def symbol(self, tree):
+        name = tree.children[0].value
+        return (name)
+    def mul(self, tree):
+        a = self.visit(tree.children[0])
+        b = self.visit(tree.children[1])
+        return f"({a})*({b})"
+    def call(self, tree):
+        funname = tree.children[0].value
+        args = self.visit( tree.children[1] )
+        return f"{funname}({args})"
+    def exponential(self, tree):
+        arg1 = self.visit(tree.children[0])
+        arg2 = self.visit(tree.children[1])
+        return f"({arg1})^({arg2})"
+    def number(self, tree):
+        return tree.children[0].value
+
+
+
+## replaces v[t] by v[t+0] (I didn't find how to do it in the grammar)
+## replaces v by v[t] when v identified as a variable
 class Sanitizer(Transformer):
 
     def __init__(self, variables=[]):
@@ -147,6 +147,10 @@ def stringify_symbol(arg) -> str:
 
 
 
+## replaces symbols and variables by their canonical string represantation:
+## symbols s -> "s_"
+## variable v(1) -> "v_p1_"
+## variable v(-1) -> "v_m1_"
 class Stringifier(Transformer):
 
     def symbol(self, children):
@@ -158,10 +162,17 @@ class Stringifier(Transformer):
     def variable(self, children):
         
         name = children[0].children[0].value
-        date = int(children[1].children[0].value)
+        if len(children) == 1:
+            date = 0
+        else:
+            date = int(children[1].children[0].value)
         s = stringify_variable( (name, date) )
         return Tree("symbol", [Token("NAME",s)])
 
+
+###
+## if shift == 'S' replaces all v[t+k] by v[t] (is that reasonable ?)
+## if shift is an integer, replaces v[t+k] by v[t+k+shift]
 class TimeShifter(Transformer):
 
     def __init__(self, shift: int):
@@ -170,7 +181,10 @@ class TimeShifter(Transformer):
     def variable(self, children):
         
         name = children[0].children[0].value
-        date = int(children[1].children[0].value)
+        try:
+            date = int(children[1].children[0].value)
+        except:
+            date = 0
         if self.shift=="S":
             new_date = "0"
         else:
@@ -179,10 +193,63 @@ class TimeShifter(Transformer):
 
 
 
+@dataclass
+class SymbolList(dict):
+    variables: Set[Tuple[str, int]]
+    parameters: Set[str]
+    functions: Set[str]
 
+## lists all variables in an  expression
+## result field contains variables with timing, parameters, and functions used
+class VariablesLister(Visitor):
+
+    def __init__(self):
+        self.result = SymbolList(set(),set(),set())
+
+    def variable(self, tree):
+        children = tree.children
+        
+        name = children[0].children[0].value
+        date = int(children[1].children[0].value)
+        self.result.variables.add((name, date))
+
+    def symbol(self, tree):
+        children = tree.children
+        name = children[0].value
+
+        self.result.parameters.add(name)
+
+    def call(self, tree):
+        children = tree.children
+        name = children[0].value
+
+        self.result.functions.add(name)
+
+
+## replaces symbols in an expression:
+## NameSustituter({'h': parser.parse("e+1")}).visit(parser.parse("h+p"))  returns 
+## parser.parse("e+1+p")
+class NameSubstituter(Transformer):
+
+    # substitutes a symbol by an expression
+    def __init__(self, substitutions: Dict[str, Expression]):
+        self.substitutions = substitutions
+
+    def symbol(self, children):
+        name = children[0].value
+        if name in self.substitutions:
+            return self.substitutions[name]
+        else:
+            return Tree("symbol", children)
+
+
+# prints expression
 def str_expression(expr: Expression)->str:
     return Printer().visit(expr)
 
+
+# decorator to define functions which operate
+# either on Trees or on strings.
 def expression_or_string(f):
     @wraps(f)
     def wrapper(*args, **kwds):
@@ -196,6 +263,8 @@ def expression_or_string(f):
 
     return wrapper
 
+
+## these functions apply the vistors/transformers either on expressions or on strings 
 @expression_or_string
 def stringify(expr: Expression):
     return Stringifier().transform(expr)
@@ -226,37 +295,9 @@ def list_variables(expr: Union[Expression,str]) -> SymbolList:
     ll.visit(expr)
 
     return ll.result
-    # if ll.problems:
-    #     e = Exception('Symbolic error.')
-    #     e.problems = ll.problems
-    #     raise e
-    # return dedup([v[0] for v in ll.variables])
 
 list_symbols = list_variables
 
-class VariablesLister(Visitor):
-
-    def __init__(self):
-        self.result = SymbolList(set(),set(),set())
-
-    def variable(self, tree):
-        children = tree.children
-        
-        name = children[0].children[0].value
-        date = int(children[1].children[0].value)
-        self.result.variables.add((name, date))
-
-    def symbol(self, tree):
-        children = tree.children
-        name = children[0].value
-
-        self.result.parameters.add(name)
-
-    def call(self, tree):
-        children = tree.children
-        name = children[0].value
-
-        self.result.functions.add(name)
 
 def test():
 
@@ -266,13 +307,18 @@ def test():
     p0 = l.parse(s)
 
     list_variables = ['h']
-    p = Sanitize(list_variables).transform(p0)
-    print( p.pretty() )
-
-    print("Before: ", s)
-    print("After:  ", Printer().visit(p))
-
-
+    p = Sanitizer(list_variables).transform(p0)
 
     pp = time_shift(s,-2)
     pp_2 = time_shift(s, "S")
+
+    print("Original:                 ", s)
+    print("Steady-state:             ", steady_state(s))
+    print("Sanitize (variables=[h]): ", sanitize(s, variables=['h']))
+    print("Stringify: ", stringify(s))
+
+    print("Original Tree:")
+    print( p0.pretty() )
+
+if __name__ == "__main__":
+    test()
