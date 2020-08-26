@@ -4,7 +4,7 @@ from lark.visitors import Interpreter
 
 from functools import wraps
 
-from typing import Tuple, Dict, Set, Union
+from typing import Tuple, Dict, Set, Union, List
 Expression = Union[Tree, Token]
 
 from dataclasses import dataclass
@@ -37,11 +37,11 @@ grammar_0 = """
     ?symbol: NAME -> symbol
     ?variable: symbol  "[" "t" ("+" date_index)? "]" -> variable
             | symbol "(" date_index ")" -> variable
-    ?date_index: NUMBER -> date
+    ?date_index: SIGNED_INT -> date
     ?call: FUNCTION "(" sum ")" -> call
     FUNCTION: "sin"|"cos"|"exp"|"log"
 
-    
+    %import common.SIGNED_INT
     %import common.CNAME -> NAME
     %import common.NUMBER
     %import common.WS_INLINE
@@ -96,6 +96,8 @@ class Printer(Interpreter):
         arg2 = self.visit(tree.children[1])
         return f"({arg1})^({arg2})"
     def number(self, tree):
+        return tree.children[0].value
+    def signed_int(self, tree):
         return tree.children[0].value
 
 
@@ -195,35 +197,36 @@ class TimeShifter(Transformer):
 
 @dataclass
 class SymbolList(dict):
-    variables: Set[Tuple[str, int]]
-    parameters: Set[str]
-    functions: Set[str]
+    variables: List[Tuple[str, int]]
+    parameters: List[str]
+    functions: List[str]
 
 ## lists all variables in an  expression
 ## result field contains variables with timing, parameters, and functions used
 class VariablesLister(Visitor):
 
     def __init__(self):
-        self.result = SymbolList(set(),set(),set())
+        self.result = SymbolList([],[],[])
 
     def variable(self, tree):
         children = tree.children
         
         name = children[0].children[0].value
         date = int(children[1].children[0].value)
-        self.result.variables.add((name, date))
+        if (name,date) not in self.result.variables:
+            self.result.variables.append((name, date))
 
     def symbol(self, tree):
         children = tree.children
         name = children[0].value
-
-        self.result.parameters.add(name)
+        if name not in self.result.parameters:
+            self.result.parameters.append(name)
 
     def call(self, tree):
         children = tree.children
         name = children[0].value
-
-        self.result.functions.add(name)
+        if name not in self.result.functions:
+            self.result.functions.append(name)
 
 
 ## replaces symbols in an expression:
@@ -286,7 +289,7 @@ def sanitize(expr: Expression, variables=[]):
     
 
 
-def list_variables(expr: Union[Expression,str]) -> SymbolList:
+def list_symbols(expr: Union[Expression,str]) -> SymbolList:
 
     if isinstance(expr, str):
         expr = parser.parse(str)
@@ -296,7 +299,8 @@ def list_variables(expr: Union[Expression,str]) -> SymbolList:
 
     return ll.result
 
-list_symbols = list_variables
+def list_variables(expr: Union[Expression, str]):
+    return list_symbols(expr).variables
 
 
 def test():
