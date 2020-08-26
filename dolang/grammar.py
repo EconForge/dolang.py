@@ -1,6 +1,7 @@
 import lark
-from lark import Tree, Token, Visitor, Transformer
-from lark.visitors import Interpreter
+from lark.tree import Tree
+from lark.lexer import Token
+from lark.visitors import Interpreter,  Visitor, Transformer
 
 from functools import wraps
 
@@ -34,21 +35,27 @@ grammar_0 = """
          | "(" sum ")"
          | call
          | variable
-    ?symbol: NAME -> symbol
-    ?variable: symbol  "[" "t" ("+" date_index)? "]" -> variable
-            | symbol "(" date_index ")" -> variable
-    ?date_index: SIGNED_INT -> date
+    !symbol: NAME -> symbol
+    variable: cname  "[" date_index "]" -> variable
+            | cname "[" "t" "]" -> variable
+            | cname "(" date_index ")" -> variable
+    !cname: NAME -> name
+    ?date_index: "t" SIGNED_INT2 -> date
+        | SIGNED_INT -> date
     ?call: FUNCTION "(" sum ")" -> call
     FUNCTION: "sin"|"cos"|"exp"|"log"
 
+    SIGNED_INT2: ("+"|"-") INT
     %import common.SIGNED_INT
+    %import common.INT
     %import common.CNAME -> NAME
     %import common.NUMBER
     %import common.WS_INLINE
     %ignore WS_INLINE
 """
 
-parser = lark.Lark(grammar_0)
+from lark.lark import Lark
+parser = Lark(grammar_0)
 
 
 # Prints a tree as a string
@@ -326,3 +333,18 @@ def test():
 
 if __name__ == "__main__":
     test()
+
+
+def tree_to_ast(tree):
+    import ast
+    import re
+    __regex_eq__ = re.compile("([^=]*)=([^=]*)")
+
+    txt = (str_expression(tree))
+
+    ss = txt.replace("^", "**")
+    m = re.match(__regex_eq__, ss)
+    if m:
+        ss = str.join('==', m.groups())
+    
+    return ast.parse(ss).body[0]
