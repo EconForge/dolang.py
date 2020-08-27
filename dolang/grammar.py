@@ -18,23 +18,32 @@ from dataclasses import dataclass
 
 grammar_0 = """
     ?start: equation
-    ?equation: equality | sum
-    ?equality: sum "=" sum 
+
+    ?equation: double_complementarity | equality | formula
+    equality: sum "=" sum 
         | sum "==" sum
+    double_inequality: formula "<=" symbol "<=" formula
+        | formula "<=" variable "<=" formula
+    double_complementarity: formula _PERP double_inequality
+
+    _PERP: "⟂" | "|"
+
+    ?formula: sum
     ?sum: product
         | sum "+" product   -> add
         | sum "-" product   -> sub
     ?product: atom
-        | exponential
         | product "*" atom  -> mul
         | product "/" atom  -> div
-    ?exponential: atom "^" atom
+    ?pow: atom "^" atom
     ?atom: NUMBER           -> number
          | "-" atom         -> neg
+         | pow
          | symbol            
          | "(" sum ")"
          | call
          | variable
+
     !symbol: NAME -> symbol
     variable: cname  "[" date_index "]" -> variable
             | cname "[" "t" "]" -> variable
@@ -87,6 +96,22 @@ class Printer(Interpreter):
             ds = "t-"+str(-time)
         return f"{name}[{ds}]"
 
+    def equality(self, tree):
+        a = self.visit(tree.children[0])
+        b = self.visit(tree.children[1])
+        return f"{a} = {b}"
+        
+    def double_complementarity(self, tree):
+        a = self.visit(tree.children[0])
+        b = self.visit(tree.children[1])
+        return f"{a} ⟂ {b}"
+
+    def double_inequality(self, tree):
+        a = self.visit(tree.children[0])
+        b = self.visit(tree.children[1])
+        c = self.visit(tree.children[2])
+        return f"{a} <= {b} <= {c}"
+
     def symbol(self, tree):
         name = tree.children[0].value
         return (name)
@@ -94,11 +119,15 @@ class Printer(Interpreter):
         a = self.visit(tree.children[0])
         b = self.visit(tree.children[1])
         return f"({a})*({b})"
+    def div(self, tree):
+        a = self.visit(tree.children[0])
+        b = self.visit(tree.children[1])
+        return f"({a})/({b})"
     def call(self, tree):
         funname = tree.children[0].value
         args = self.visit( tree.children[1] )
         return f"{funname}({args})"
-    def exponential(self, tree):
+    def pow(self, tree):
         arg1 = self.visit(tree.children[0])
         arg2 = self.visit(tree.children[1])
         return f"({arg1})^({arg2})"
@@ -120,7 +149,7 @@ class Sanitizer(Transformer):
         tok = args[0][0]
         val = tok.value
         if val in self.__variables__:
-            return Tree("variable", [Tree("symbol", [Token("NAME", val)]), Tree("date", [Token("NUMBER", '0')])])
+            return Tree("variable", [Tree("name", [Token("NAME", val)]), Tree("date", [Token("NUMBER", '0')])])
         else:
             return Tree("symbol", *args)
 
@@ -176,6 +205,7 @@ class Stringifier(Transformer):
         else:
             date = int(children[1].children[0].value)
         s = stringify_variable( (name, date) )
+        print((name,date), ": ", s)
         return Tree("symbol", [Token("NAME",s)])
 
 
@@ -198,7 +228,7 @@ class TimeShifter(Transformer):
             new_date = "0"
         else:
             new_date = str(date + self.shift)
-        return Tree("variable", [Tree("symbol", [Token("NAME", name)]), Tree("date", [Token("NUMBER", new_date)])])
+        return Tree("variable", [Tree("name", [Token("NAME", name)]), Tree("date", [Token("NUMBER", new_date)])])
 
 
 
@@ -252,6 +282,15 @@ class NameSubstituter(Transformer):
         else:
             return Tree("symbol", children)
 
+def subs(expr: str, substitutions):
+    import copy
+    s = dict()
+    f = expr
+    for k,v in substitutions.items():
+        s[k] = parser.parse(v)
+    ns = NameSubstituter(s)
+    res = ns.transform(f)
+    return str_expression(res)
 
 # prints expression
 def str_expression(expr: Expression)->str:

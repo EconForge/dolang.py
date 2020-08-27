@@ -59,7 +59,8 @@ def compile_factory(fff: FlatFunctionFactory):
 def make_method_from_factory(fff: FlatFunctionFactory, vectorize=True, use_file=False, debug=False):
     mod = compile_factory(fff)
 
-    if debug:
+    if True:
+        from .codegen import to_source
         print(to_source(mod))
 
     if vectorize:

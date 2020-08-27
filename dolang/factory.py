@@ -55,12 +55,11 @@ def substitute_preamble(ff: FlatFunctionFactory):
     from .symbolic import NameSubstituter
     pr = copy.copy(ff.preamble)
     for k in pr.keys():
-        pr[k] = dolang.parse_string(pr[k]).value
+        pr[k] = dolang.parse_string(pr[k])
     st = NameSubstituter(pr)
     dd = copy.copy(ff.content)
     for k in dd.keys():
-        eq = dolang.parse_string(dd[k]).value
-        dd[k] = to_source(st.visit(eq))
+        dd[k] = to_source(st.transform(eq))
     return FlatFunctionFactory({}, dd, ff.arguments, ff.funname)
 
 

@@ -9,6 +9,15 @@ def test_parsing():
     e = parse_string("s + a(0) + b[t-1] + b[t] + b[t+1]")
     print(e.pretty())
 
+    e = parse_string("chi*n^eta*c^sigma - w(1)")
+    print(e.pretty())
+
+    e = parse_string("chi*n^eta*c^sigma - w(1) | 0.01 <= n <= 1.0")
+    print(e.pretty())
+
+    e = parse_string("chi*n^eta*c^sigma - w(1) ⟂ 0.01 <= n <= 1.0")
+    print(e.pretty())
+
 def test_parse_string():
     from dolang.symbolic import parse_string
     e = parse_string('sin(a(1)+b+f(1)+f(4)+a[t+1])')
