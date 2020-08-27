@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "dolang"
-version = "0.0.1"
+version = "0.0.9"
 description = "Dolo Modeling Language"
 authors = ["Winant Pablo <pablo.winant@gmail.com>"]
 license="BSD-2-Clause"
