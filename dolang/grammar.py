@@ -198,7 +198,10 @@ class Stringifier(Transformer):
     def symbol(self, children):
         
         name = children[0].value
-        s = stringify_parameter( name)
+        if name == "inf":
+            s = name
+        else:
+            s = stringify_parameter( name)
         return Tree("symbol", [Token("NAME",s)])
 
     def variable(self, children):
