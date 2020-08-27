@@ -2,6 +2,7 @@
 name = "dolang"
 version = "0.0.10"
 description = "Dolo Modeling Language"
+readme = "README.md"
 authors = ["Winant Pablo <pablo.winant@gmail.com>"]
 license="BSD-2-Clause"
 
