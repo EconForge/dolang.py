@@ -5,6 +5,7 @@ from dolang.grammar import Tree
 
 
 def test_parsing():
+    from dolang.grammar import str_expression, sanitize
     from dolang.symbolic import parse_string
     e = parse_string("s + a(0) + b[t-1] + b[t] + b[t+1]")
     print(e.pretty())
@@ -17,6 +18,22 @@ def test_parsing():
 
     e = parse_string("chi*n^eta*c^sigma - w(1) ⟂ 0.01 <= n <= 1.0")
     print(e.pretty())
+
+    e = parse_string("i = exp(z)*k^alpha*n^(1-alpha) - (m)^(-1/sigma)")
+    print(e.pretty())
+    f = sanitize(e, variables=['m'])
+    print(str_expression(f))
+
+    s = "i = exp(z)*k^alpha*n^(1-alpha) - (m)^(-1/sigma)"
+    e = parse_string(s)
+
+    s = "i = exp(z)*k^alpha*n^(1-alpha) - (m)^(-1/sigma)"
+    # vars = ['z', 'p', 'k', 'n', 'i', 'm', 'V', 'u', 'y', 'c', 'rk', 'w', 'y', 'c']
+    # print("HI")
+    # v = sanitize(s, variables=vars)
+    # print(v)
+    e = parse_string(s)
+    print( str_expression(e) )
 
 def test_parse_string():
     from dolang.symbolic import parse_string

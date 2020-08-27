@@ -32,5 +32,3 @@ def test_compiler():
     assert( abs(out[1] - 8.2)<1e-8 )
 
 
-if __name__ == "__main__":
-    test_compiler()

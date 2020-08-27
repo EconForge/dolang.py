@@ -100,7 +100,7 @@ class Printer(Interpreter):
         a = self.visit(tree.children[0])
         b = self.visit(tree.children[1])
         return f"{a} = {b}"
-        
+
     def double_complementarity(self, tree):
         a = self.visit(tree.children[0])
         b = self.visit(tree.children[1])
@@ -135,6 +135,10 @@ class Printer(Interpreter):
         return tree.children[0].value
     def signed_int(self, tree):
         return tree.children[0].value
+    def neg(self, tree):
+        a = self.visit(tree.children[0])
+        return f"-({a})"
+
 
 
 
@@ -205,7 +209,6 @@ class Stringifier(Transformer):
         else:
             date = int(children[1].children[0].value)
         s = stringify_variable( (name, date) )
-        print((name,date), ": ", s)
         return Tree("symbol", [Token("NAME",s)])
 
 
