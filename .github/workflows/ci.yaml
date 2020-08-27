@@ -11,7 +11,7 @@ jobs:
       matrix:
         python-version: [ '3.7', '3.8' ]
 
-    name: Dolo Python Version ${{ matrix.python-version }}
+    name: Dolang Python Version ${{ matrix.python-version }}
     steps:
 
       - uses: actions/checkout@v2
