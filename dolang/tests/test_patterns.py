@@ -1,25 +1,27 @@
-import dolang
-from dolang.pattern import compare_strings
-import yaml
+def test_patterns():
 
-class bcolors:
-    HEADER = '\033[95m'
-    OKBLUE = '\033[94m'
-    OKGREEN = '\033[92m'
-    WARNING = '\033[93m'
-    FAIL = '\033[91m'
-    ENDC = '\033[0m'
-    BOLD = '\033[1m'
-    UNDERLINE = '\033[4m'
+    import dolang
+    from dolang.pattern import compare_strings
+    import yaml
 
-tests = yaml.safe_load(open('tests/patterns.yaml'))
+    class bcolors:
+        HEADER = '\033[95m'
+        OKBLUE = '\033[94m'
+        OKGREEN = '\033[92m'
+        WARNING = '\033[93m'
+        FAIL = '\033[91m'
+        ENDC = '\033[0m'
+        BOLD = '\033[1m'
+        UNDERLINE = '\033[4m'
 
-pattern_tests = tests['patterns']
+    tests = yaml.safe_load(open('tests/patterns.yaml'))
 
-for l in pattern_tests:
+    pattern_tests = tests['patterns']
 
-    res = compare_strings(l[0], l[1])
-    expected = l[2]
-    ok = (res==expected)
-    msg = bcolors.OKBLUE+'✓'+bcolors.ENDC if ok else bcolors.FAIL+'✗'+bcolors.ENDC
-    print('{} : {} : {} : ({} instead of {})'.format(msg,l[0],l[1],res,expected))
+    for l in pattern_tests:
+
+        res = compare_strings(l[0], l[1])
+        expected = l[2]
+        ok = (res==expected)
+        msg = bcolors.OKBLUE+'✓'+bcolors.ENDC if ok else bcolors.FAIL+'✗'+bcolors.ENDC
+        print('{} : {} : {} : ({} instead of {})'.format(msg,l[0],l[1],res,expected))

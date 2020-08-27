@@ -2,6 +2,7 @@ import ast
 from ast import Assign, arg, FunctionDef, Module, Store, Subscript, Name, Load, Index, Num
 from ast import arguments as ast_arguments
 
+from dolang.grammar import tree_to_ast
 from dolang.factory import FlatFunctionFactory
 from dolang.symbolic import parse_string
 from dolang.codegen import to_source
@@ -23,13 +24,14 @@ def compile_factory(fff: FlatFunctionFactory):
     body = []
 
     for (k, neq) in fff.preamble.items():
-        val = parse_string(neq).value
+        tree = parse_string(neq)
+        val = tree_to_ast(tree).value
         line = Assign(targets=[Name(id=k, ctx=Store())], value=val)
         body.append(line)
 
     for n, (k, neq) in enumerate(fff.content.items()):
-        # should the result of parse_string always of type Expr ?
-        val = parse_string(neq).value
+        tree = parse_string(neq)
+        val = tree_to_ast(tree).value
         line = Assign(targets=[Name(id=k, ctx=Store())], value=val)
         body.append(line)
     #
@@ -51,7 +53,6 @@ def compile_factory(fff: FlatFunctionFactory):
                         body=unpacking + body, decorator_list=[])
         mod = Module(body=[f])
 
-
     mmod = ast.fix_missing_locations(mod)
     return mmod
 
@@ -59,6 +60,7 @@ def make_method_from_factory(fff: FlatFunctionFactory, vectorize=True, use_file=
     mod = compile_factory(fff)
 
     if debug:
+        from .codegen import to_source
         print(to_source(mod))
 
     if vectorize:

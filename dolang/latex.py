@@ -1,6 +1,20 @@
 import re
 import ast
-from .symbolic import eval_scalar
+
+def eval_scalar(tree):
+    try:
+        if isinstance(tree, ast.Num):
+            return tree.n
+        elif isinstance(tree, ast.UnaryOp):
+            if isinstance(tree.op, ast.USub):
+                return -tree.operand.n
+            elif isinstance(tree.op, ast.UAdd):
+                return tree.operand.n
+        else:
+            raise Exception("Don't know how to do that.")
+    except:
+        raise Exception("Don't know how to do that.")
+
 
 def parse(s): return ast.parse(s).body[0].value
 
@@ -99,9 +113,9 @@ def greekify(expr):
     else:
         res = expr
     if suffix=='bar':
-        res = "\overline{{{}}}".format(res)
+        res = "\\overline{{{}}}".format(res)
     elif suffix == 'star':
-        res = "{}^{{\star}}".format(res)
+        res = "{}^{{\\star}}".format(res)
     return res
 # greekify('zbar')
 
@@ -173,7 +187,7 @@ class LatexVisitor(ExprVisitor):
         func = self.visit(n.func)
         args = ', '.join(map(self.visit, n.args))
         if func == 'sqrt':
-            return '\sqrt{%s}' % args
+            return '\\sqrt{%s}' % args
         else:
             return r'\operatorname{%s}\left(%s\right)' % (func, args)
 
@@ -321,12 +335,3 @@ def eq2tex(variables, s):
     else: return expr2tex(variables,expr)
 
 # ast.dump(ast.parse("a == b"))
-
-if __name__ == "__main__":
-
-    s = '(a + w_1__y)/2 + 1'
-    s =  "-(1+2)"
-    s = "a*x(2) + b*y(-1)"
-    print( expr2tex(['x','y'], s) )
-    eq = "l = a*x(2) + b*y(-1)"
-    print( eq2tex(['x','y'], eq))
