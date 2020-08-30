@@ -35,6 +35,14 @@ def test_parsing():
     e = parse_string(s)
     print( str_expression(e) )
 
+def test_expectation():
+    from dolang.symbolic import parse_string
+    s = "𝔼[ (x[t+1] / x[t]) ]"
+    e = parse_string(s)
+    print(e.pretty())
+    from dolang.symbolic import str_expression
+    print(str_expression(e))
+
 def test_parse_string():
     from dolang.symbolic import parse_string
     e = parse_string('sin(a(1)+b+f(1)+f(4)+a[t+1])')
@@ -42,6 +50,28 @@ def test_parse_string():
     s = to_source(e)
     assert (s == "sin(a[t+1] + b + f[t+1] + f[t+4] + a[t+1])")
 
+
+
+def test_predicate():
+    from dolang.symbolic import parse_string, str_expression
+    e = parse_string('a[t] <= (x[t]+b)')
+    print(e.pretty())
+    print(str_expression(e))
+    e = parse_string('∀t, a[t] <= (x[t]+b)')
+    print(e.pretty())
+    print(str_expression(e))
+
+
+def test_subperiod():
+    from dolang.symbolic import parse_string, str_expression
+    e = parse_string('a[t$1] = a[t+1]')
+    print(e.pretty())
+    print(str_expression(e))
+    e = parse_string('a[t$consumption] = a[t+1]')
+    print(e.pretty())
+    print(str_expression(e))
+    tchuk
+    from lark.lark import Lark
 
 # def test_list_symbols_debug():
 #     from dolang.symbolic import parse_string

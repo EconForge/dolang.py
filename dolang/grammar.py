@@ -17,14 +17,18 @@ from dataclasses import dataclass
 ## later, this compatibility feature will be turned off.
 
 grammar_0 = """
-    ?start: equation
+    ?start: equation | predicate
 
     ?equation: double_complementarity | equality | formula
     equality: sum "=" sum 
         | sum "==" sum
+    !inequality: formula ("<="|"<"|">"|">=") formula
+    predicate: [quantifier] (equality | inequality)
+    quantifier: "∀" "t" ","
     double_inequality: formula "<=" symbol "<=" formula
         | formula "<=" variable "<=" formula
     double_complementarity: formula _PERP double_inequality
+
 
     _PERP: "⟂" | "|"
 
@@ -41,13 +45,17 @@ grammar_0 = """
          | pow
          | symbol            
          | "(" sum ")"
+         | expectation
          | call
          | variable
 
     !symbol: NAME -> symbol
+    expectation: ("E["|"𝔼[") formula "]" -> expectation
     variable: cname  "[" date_index "]" -> variable
             | cname "[" "t" "]" -> variable
             | cname "(" date_index ")" -> variable
+            | cname "[" "t$" subperiod "]"
+    subperiod: INT | NAME
     !cname: NAME -> name
     ?date_index: "t" SIGNED_INT2 -> date
         | SIGNED_INT -> date
@@ -82,8 +90,16 @@ class Printer(Interpreter):
         a = self.visit(tree.children[0])
         b = self.visit(tree.children[1])
         return f"{a} - ({b})"
+
     def variable(self, tree):
         name = tree.children[0].children[0].value
+
+        # is there a subperiod?
+        subperiod = [c for c in tree.children if (isinstance(c,Tree) and c.data=='subperiod')]
+        if len(subperiod)==1:
+            sp = subperiod[0].children[0].value
+            return f"{name}[t${sp}]"
+
         try:
             time = int(tree.children[1].children[0].value)
         except:
@@ -138,7 +154,19 @@ class Printer(Interpreter):
     def neg(self, tree):
         a = self.visit(tree.children[0])
         return f"-({a})"
-
+    def expectation(self, tree):
+        a = self.visit(tree.children[0])
+        return f"𝔼[ {a} ]"
+    def inequality(self, tree):
+        a = self.visit(tree.children[0])
+        b = (tree.children[1]).value
+        c = self.visit(tree.children[2])
+        return f"{a} {b} {c}"
+    def predicate(self, tree):
+        if len(tree.children)==1:
+            return self.visit(tree.children[0])
+        else:
+            return "∀t, " + self.visit(tree.children[1])
 
 
 
