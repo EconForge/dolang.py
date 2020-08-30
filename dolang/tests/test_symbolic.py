@@ -70,7 +70,6 @@ def test_subperiod():
     e = parse_string('a[t$consumption] = a[t+1]')
     print(e.pretty())
     print(str_expression(e))
-    tchuk
     from lark.lark import Lark
 
 # def test_list_symbols_debug():
