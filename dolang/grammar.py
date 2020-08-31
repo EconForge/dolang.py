@@ -17,14 +17,14 @@ from dataclasses import dataclass
 ## later, this compatibility feature will be turned off.
 
 grammar_0 = """
-    ?start: equation | predicate
+    ?start: equation_list | equation | predicate
 
-    ?equation: double_complementarity | equality | formula
+
     equality: sum "=" sum 
         | sum "==" sum
     !inequality: formula ("<="|"<"|">"|">=") formula
-    predicate: [quantifier] (equality | inequality)
-    quantifier: "∀" "t" ","
+    predicate: [quantifier] ("," equality | "," inequality)?
+    quantifier: "∀" "t"
     double_inequality: formula "<=" symbol "<=" formula
         | formula "<=" variable "<=" formula
     double_complementarity: formula _PERP double_inequality
@@ -32,6 +32,20 @@ grammar_0 = """
 
     _PERP: "⟂" | "|"
 
+    ?equation: equality
+        | formula
+        | predicate (","|":") NEWLINE? formula
+        | predicate (","|":") NEWLINE? equality
+
+    ?equation_or_tag: tag
+        | equation
+        | COMMENT
+
+    COMMENT: /#[^\\n]*/
+
+    tag: "!transition" | "!arbitrage" | "!" NAME
+
+    equation_list: NEWLINE* (equation_or_tag NEWLINE)* equation_or_tag NEWLINE*
     ?formula: sum
     ?sum: product
         | sum "+" product   -> add
@@ -63,11 +77,14 @@ grammar_0 = """
     FUNCTION: "sin"|"cos"|"exp"|"log"
 
     SIGNED_INT2: ("+"|"-") INT
+    
+    
     %import common.SIGNED_INT
     %import common.INT
     %import common.CNAME -> NAME
     %import common.NUMBER
     %import common.WS_INLINE
+    %import common.NEWLINE
     %ignore WS_INLINE
 """
 

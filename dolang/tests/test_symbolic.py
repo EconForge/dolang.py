@@ -48,9 +48,23 @@ def test_parse_string():
     e = parse_string('sin(a(1)+b+f(1)+f(4)+a[t+1])')
     assert isinstance(e, Tree)
     s = to_source(e)
+    print(e.pretty())
     assert (s == "sin(a[t+1] + b + f[t+1] + f[t+4] + a[t+1])")
 
+def test_equation_list():
+    from dolang.symbolic import parse_string
+    e = parse_string("a[t] = b[t]\nx[t] = x2[t]  \n  x3[t] = z")
+    assert isinstance(e, Tree)
+    s = to_source(e)
+    print(s)
+    print(e.pretty())
+    f = parse_string("∀t, a[t] = b[t]")
+    print(f.pretty())
 
+
+    f = parse_string("∀t, a[t] = b[t]\nx[t] = x2[t]  \n  x3[t] = z")
+    print(f.pretty())
+    
 
 def test_predicate():
     from dolang.symbolic import parse_string, str_expression

@@ -1,0 +1,82 @@
+# portfolio model, in current dolo formulation
+
+equations: |
+
+    # syntax for tags are not set in stone at all.
+    # in the following example, the type of equation
+    # can be autodetected.
+    !transition
+    r[t] = xi[t-1] * r_1[t] + (1-xi[t-1]) * r_2[t]
+    w[t] = y[t] + (w[t-1]-c[t-1]) * (1+r[t])
+
+    !arbitrage
+    beta*𝔼[ (c[t+1]/c[t])^(-sigma)*r[t+1] ] = 1
+    beta*𝔼[ (c[t+1]/c[t])^(-sigma)*(r_2[t+1]-r_1[t+1]) ] = 1
+
+
+calibration:
+    beta: 0.95
+    # ...
+
+---
+
+# on this example the declarations can be auto-detected
+symbols:
+    t:
+        states: w
+        controls: c
+    t$1:
+        states: a
+        controls: xi
+    
+
+equations: |
+
+    !transition
+    # defines state variables in post-state t$1
+    a[t$1] = w[t] - c[t]
+
+    # defines state variables in state t+1
+    # they don't depend on variables at t, only at t$1
+    w[t+1] = y[t+1] + a[t$1]*(1+r[t+1])
+
+    !definitions
+    # variable r is not useful on its own
+    # it can be substituted where it appears
+    r[t+1] = xi[t$1] * r_1[t+1] + (1-xi[t$1]) * r_2[t+1]
+
+    !arbitrage
+    # that one must be understood implicitly as an equation between
+    # t$1 and t+1. Hence it is a function of states at t¹
+    # it is used to solve for xi[t$1]
+    beta*𝔼[ (c[t+1])^(-sigma)*(r_2[t+1]-r_1[t+1]) ] = 0
+
+    !expectation
+    # define an expectation variable at date t$1
+    h[t$1] = beta*𝔼[ (c[t+1])^(-sigma)*r[t+1] ]
+
+    !direct
+    # solve for controls at t:
+    c[t] = (h[t$1])^(-1/sigma)
+
+domain:
+    w[t]: [0,100]
+    a[t$1]: [0,104]
+
+calibration:
+    sigma: 5.0
+
+remarks: |
+
+    The solution for this problem is made of two functions.
+    - c[t](w[t])  (w is state-space at t)
+    - xi[t$1](a[t$1])  (a is state-space at t)
+
+    Choosing independent grids for w and a would yield a perfectly valid
+    algorithm. Or one might want to define grid at t as a function of grid at t+1
+    using the rule `w[t] = a[t] - c[t]`. Not hundred percent sure the gains, would be sizable 🐍.
+
+    In general how the solution algorithm can be discovered. In this particular case,
+    as a succession of dolo-like time-iteration steps. It is a succession of
+    - time-iteration steps where arbitrage equation is solved between t$1 and t+1
+    - direct-time-iteration steps between t$1 and t which yields a direct solution to the optimization problem
