@@ -1,0 +1,91 @@
+<!doctype html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+		<title>reveal.js</title>
+
+		<link rel="stylesheet" href="/node_modules/reveal.js/dist/reset.css">
+		<link rel="stylesheet" href="/node_modules/reveal.js/dist/reveal.css">
+		<link rel="stylesheet" href="/node_modules/reveal.js/dist/theme/white.css" id="theme">
+		<link rel="stylesheet" href="/node_modules/reveal.js/plugin/highlight/white.css" id="highlight-theme">
+		<style type="text/css" media="screen">
+
+/* Clear floats after the columns */
+.code {
+  float: right;
+  width: 50%;
+}
+
+.fig-container {
+  float: left;
+  width: 50%;
+}
+
+.row:after {
+  content: "";
+  display: table;
+  clear: both;
+}
+
+		</style>
+	</head>
+
+	<body>
+		<div class="reveal">
+			<div class="slides">
+
+				<section>
+
+					This is my title
+
+					<div class="row">
+
+						<div class="fig-container"
+							data-file="graph.html">
+						</div>
+
+						<!-- <div class="model_code"> -->
+
+							<pre>
+								<code data-line-numbers="3,8-10">∀t,
+  c[t] ∈ [0,m[t]]
+  a[t$] = m[t] - c[t]
+  m[t+1] = y[t+1] + a[t]*r
+  
+  h[t$] = β * 𝔼[c[t+1]^(-γ)]
+
+  c[t$] = h[t$]^(1/γ)
+
+  m[t] = a[t$] - c[t$]
+
+
+								</code>
+							</pre>					
+						
+						<!-- </div>  -->
+						
+					</div>
+				</div>
+				</section>
+			</div>
+		</div>
+
+		<script src="/node_modules/reveal.js/dist/dist/reveal.js"></script>
+		<script src="/node_modules/reveal.js/dist/plugin/notes/notes.js"></script>
+		<script src="/node_modules/reveal.js/dist/plugin/markdown/markdown.js"></script>
+		<script src="/node_modules/reveal.js/dist/plugin/highlight/highlight.js"></script>
+		<script>
+			Reveal.initialize({
+				hash: true,
+				dependencies: [
+					{ src: 'reveald3.js' },
+				],
+				width: 1920,
+				height: 1080,
+				plugins: [ RevealMarkdown, RevealHighlight, RevealNotes ]
+			});
+		</script>
+	</body>
+</html>
