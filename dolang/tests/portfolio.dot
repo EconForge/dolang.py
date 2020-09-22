@@ -1,0 +1,25 @@
+digraph G {
+    splines="FALSE";
+
+    /* Entities */
+    "c[t]" [shape="square"]
+    
+    "c[t+1]" [shape="square"]
+
+    /* Relationships */
+    "m[t]" -> "c[t]" [color="red"]
+    {"m[t]", "c[t]"} -> "m[t+1]"
+    
+    "m[t+1]" -> "c[t+1]" [color="red"]
+
+    {"m[t]" "m[t+1]" "c[t+1]"} -> "c[t]" [color="blue"]
+    
+    
+
+    /* Ranks */
+    {rank=same "m[t]" "c[t]"}
+    {rank=same "m[t+1]" "c[t+1]"}
+    
+}
+
+
