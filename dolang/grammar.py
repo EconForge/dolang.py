@@ -63,9 +63,12 @@ grammar_0 = """
     FUNCTION: "sin"|"cos"|"exp"|"log"
 
     SIGNED_INT2: ("+"|"-") INT
+
+    UNICODE_LETTER: /[^\W\d_\$]/
+    NAME: UNICODE_LETTER ("_"|UNICODE_LETTER|DIGIT)*
     %import common.SIGNED_INT
+    %import common.DIGIT
     %import common.INT
-    %import common.CNAME -> NAME
     %import common.NUMBER
     %import common.WS_INLINE
     %ignore WS_INLINE
@@ -169,6 +172,9 @@ class Printer(Interpreter):
             return "∀t, " + self.visit(tree.children[1])
 
 
+def create_variable(name, time):
+    return Tree("variable", [Tree("name", [Token("NAME", name)]), Tree("date", [Token("NUMBER", str(time))])])
+
 
 ## replaces v[t] by v[t+0] (I didn't find how to do it in the grammar)
 ## replaces v by v[t] when v identified as a variable
@@ -190,6 +196,14 @@ class Sanitizer(Transformer):
             date = Tree('date',[Token("NUMBER", '0')])
             args = (args[0] + [date], )
         return Tree("variable", *args)
+
+
+## removes timing (replace v[t], v[t-1] or v[t+1] by v)
+class TimeRemover(Transformer):
+
+    def variable(self, args):
+        name = args[0].children[0].value
+        return Tree("symbol", [Token("NAME", name)])
 
 def stringify_variable(arg: Tuple[str, int]) -> str:
     s = arg[0]
@@ -368,6 +382,10 @@ def sanitize(expr: Expression, variables=[]):
     return Sanitizer(variables=variables).transform(expr)
     
 
+@expression_or_string
+def remove_timing(expr: Expression):
+    return TimeRemover().transform(expr)
+    
 
 def list_symbols(expr: Union[Expression,str]) -> SymbolList:
 
