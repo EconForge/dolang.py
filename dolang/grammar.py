@@ -1,3 +1,6 @@
+from lark.exceptions import LarkError
+from yaml import ScalarNode
+
 import lark
 from lark.tree import Tree
 from lark.lexer import Token
@@ -76,6 +79,25 @@ grammar_0 = """
 
 from lark.lark import Lark
 parser = Lark(grammar_0)
+
+
+def parse_string(text, start=None):
+    if isinstance(text, ScalarNode):
+        if text.tag != 'tag:yaml.org,2002:str':
+            raise Exception(f"Don't know how to parse node {text}")
+        txt = text.value
+    else:
+        txt = text
+    
+    try:
+        return parser.parse(txt, start)
+    except LarkError as e:
+
+        if isinstance(text, ScalarNode):
+            sm = text.start_mark
+            em = text.end_mark
+            print(f"LARK raised an exception when parsing text between {sm.line, sm.column} and {em.line, em.column}")
+        raise e
 
 
 # Prints a tree as a string
