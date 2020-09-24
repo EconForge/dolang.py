@@ -1,4 +1,5 @@
 import math
+import copy
 
 functions = {
     'log': math.log,
@@ -80,6 +81,7 @@ class ModelError(Exception):
 
 def eval_data(data: 'yaml_structure', calibration={}):
 
+    import warnings
     from yaml import MappingNode, SequenceNode, ScalarNode
 
     if isinstance(data, ScalarNode):
@@ -120,7 +122,7 @@ def eval_data(data: 'yaml_structure', calibration={}):
 
     elif isinstance(data, MappingNode):
 
-        if data.tag is not None and data.tag=='!Function':
+        if (data.tag is not 'tag:yaml.org,2002:map') and data.tag=='!Function':
             return eval_function(data, calibration)
 
         tag = data.tag
@@ -139,9 +141,9 @@ def eval_data(data: 'yaml_structure', calibration={}):
             for a in data.keys():
                 ## TODO account for repeated greek arguments
                 if (a not in sigkeys) and (greek_translation.get(a,None) not in sigkeys):
-                    lc = data.lc
+                    lc = data.start_mark
                     sigstring = str.join(', ', [f"{k}={str(v)}" for k,v in signature.items()])
-                    msg = f"Line {lc.line}, column {lc.col}. Unexpected argument '{a}'. Expected: '{objclass.__name__}({sigstring})'"
+                    msg = f"Line {lc.line}, column {lc.column}. Unexpected argument '{a}'. Expected: '{objclass.__name__}({sigstring})'"
                     raise ModelError(msg)
                 else:
                     try:

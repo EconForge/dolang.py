@@ -42,7 +42,10 @@ grammar_0 = """
     ?product: atom
         | product "*" atom  -> mul
         | product "/" atom  -> div
-    ?pow: atom "^" atom
+    ?pow: atom _POW atom -> pow
+
+    _POW: "^"|"**"
+    
     ?atom: NUMBER           -> number
          | "-" atom         -> neg
          | pow
