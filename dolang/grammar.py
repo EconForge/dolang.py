@@ -19,66 +19,12 @@ from dataclasses import dataclass
 ## v is a prespecified function.
 ## later, this compatibility feature will be turned off.
 
-grammar_0 = """
-    ?start: equation | predicate
+import os
+DIR_PATH, this_filename = os.path.split(__file__)
+DATA_PATH = os.path.join(DIR_PATH, "grammar.lark")
 
-    ?equation: double_complementarity | equality | formula
-    equality: sum "=" sum 
-        | sum "==" sum
-    !inequality: formula ("<="|"<"|">"|">=") formula
-    predicate: [quantifier] (equality | inequality)
-    quantifier: "∀" "t" ","
-    double_inequality: formula "<=" symbol "<=" formula
-        | formula "<=" variable "<=" formula
-    double_complementarity: formula _PERP double_inequality
+grammar_0 = open(DATA_PATH,'rt').read()
 
-
-    _PERP: "⟂" | "|"
-
-    ?formula: sum
-    ?sum: product
-        | sum "+" product   -> add
-        | sum "-" product   -> sub
-    ?product: atom
-        | product "*" atom  -> mul
-        | product "/" atom  -> div
-    ?pow: atom _POW atom -> pow
-
-    _POW: "^"|"**"
-    
-    ?atom: NUMBER           -> number
-         | "-" atom         -> neg
-         | pow
-         | symbol            
-         | "(" sum ")"
-         | expectation
-         | call
-         | variable
-
-    !symbol: NAME -> symbol
-    expectation: ("E["|"𝔼[") formula "]" -> expectation
-    variable: cname  "[" date_index "]" -> variable
-            | cname "[" "t" "]" -> variable
-            | cname "(" date_index ")" -> variable
-            | cname "[" "t$" subperiod "]"
-    subperiod: INT | NAME
-    !cname: NAME -> name
-    ?date_index: "t" SIGNED_INT2 -> date
-        | SIGNED_INT -> date
-    ?call: FUNCTION "(" sum ")" -> call
-    FUNCTION: "sin"|"cos"|"exp"|"log"
-
-    SIGNED_INT2: ("+"|"-") INT
-
-    UNICODE_LETTER: /[^\W\d_\$]/
-    NAME: UNICODE_LETTER ("_"|UNICODE_LETTER|DIGIT)*
-    %import common.SIGNED_INT
-    %import common.DIGIT
-    %import common.INT
-    %import common.NUMBER
-    %import common.WS_INLINE
-    %ignore WS_INLINE
-"""
 
 from lark.lark import Lark
 parser = Lark(grammar_0)
