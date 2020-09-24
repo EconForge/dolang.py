@@ -2,6 +2,12 @@
 
 ?equation: double_complementarity | equality | formula
 
+equation_block: _NEWLINE? (equation) (_NEWLINE equation )* _NEWLINE?
+complementarity_block: _NEWLINE? (double_complementarity | formula) (_NEWLINE double_complementarity | formula )* _NEWLINE?
+assignment_block: _NEWLINE? assignment (_NEWLINE assignment )* _NEWLINE?
+
+assignment: variable "=" formula
+
 equality: sum "=" sum 
     | sum "==" sum
 !inequality: formula ("<="|"<"|">"|">=") formula
@@ -49,6 +55,7 @@ FUNCTION: "sin"|"cos"|"exp"|"log"
 
 SIGNED_INT2: ("+"|"-") INT
 
+_NEWLINE: NEWLINE
 UNICODE_LETTER: /[^\W\d_\$]/
 NAME: UNICODE_LETTER ("_"|UNICODE_LETTER|DIGIT)*
 %import common.SIGNED_INT

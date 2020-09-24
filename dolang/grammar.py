@@ -27,10 +27,14 @@ grammar_0 = open(DATA_PATH,'rt').read()
 
 
 from lark.lark import Lark
-parser = Lark(grammar_0)
+parser = Lark(grammar_0, start=['start', 'equation_block', 'assignment_block', 'complementarity_block'])
 
 
 def parse_string(text, start=None):
+
+    if start is None:
+        start = 'start'
+
     if isinstance(text, ScalarNode):
         if text.tag != 'tag:yaml.org,2002:str':
             raise Exception(f"Don't know how to parse node {text}")
@@ -306,7 +310,7 @@ def subs(expr: str, substitutions):
     s = dict()
     f = expr
     for k,v in substitutions.items():
-        s[k] = parser.parse(v)
+        s[k] = parser.parse(v, start='start')
     ns = NameSubstituter(s)
     res = ns.transform(f)
     return str_expression(res)
@@ -324,7 +328,7 @@ def expression_or_string(f):
         if not isinstance(args[0], str):
             return f(*args, **kwds)
         else:
-            a = parser.parse(args[0])
+            a = parser.parse(args[0], start='start')
             nargs = tuple([a]) + args[1:]
             res = f(*nargs, **kwds)
             return str_expression(res)
@@ -361,7 +365,7 @@ def remove_timing(expr: Expression):
 def list_symbols(expr: Union[Expression,str]) -> SymbolList:
 
     if isinstance(expr, str):
-        expr = parser.parse(str)
+        expr = parser.parse(str, start='start')
 
     ll = VariablesLister()
     ll.visit(expr)
