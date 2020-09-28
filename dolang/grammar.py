@@ -36,8 +36,8 @@ def parse_string(text, start=None):
         start = 'start'
 
     if isinstance(text, ScalarNode):
-        if text.tag != 'tag:yaml.org,2002:str':
-            raise Exception(f"Don't know how to parse node {text}")
+        # if text.tag != 'tag:yaml.org,2002:str':
+        #     raise Exception(f"Don't know how to parse node {text}")
         txt = text.value
     else:
         txt = text
@@ -105,6 +105,12 @@ class Printer(Interpreter):
         b = self.visit(tree.children[1])
         c = self.visit(tree.children[2])
         return f"{a} <= {b} <= {c}"
+
+    def assignment(self, tree):
+        a = self.visit(tree.children[0])
+        b = self.visit(tree.children[1])
+        return f"{a} = {b}"
+
 
     def symbol(self, tree):
         name = tree.children[0].value
