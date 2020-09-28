@@ -1,6 +1,7 @@
-from lark.exceptions import LarkError
+from lark.exceptions import LarkError, UnexpectedInput
 from yaml import ScalarNode
 
+import copy
 import lark
 from lark.tree import Tree
 from lark.lexer import Token
@@ -36,20 +37,34 @@ def parse_string(text, start=None):
         start = 'start'
 
     if isinstance(text, ScalarNode):
-        # if text.tag != 'tag:yaml.org,2002:str':
+        if text.tag != 'tag:yaml.org,2002:str':
         #     raise Exception(f"Don't know how to parse node {text}")
-        txt = text.value
+            txt = text.value
+        else:
+            buffer = text.end_mark.buffer
+            i1 = text.start_mark.pointer
+            i2 = text.end_mark.pointer
+            txt = buffer[i1:i2]
+            if text.style in ('>', '|'):
+                txt = txt[1:]
+
     else:
         txt = text
     
     try:
         return parser.parse(txt, start)
-    except LarkError as e:
+
+    except UnexpectedInput as e:
 
         if isinstance(text, ScalarNode):
             sm = text.start_mark
-            em = text.end_mark
-            print(f"LARK raised an exception when parsing text between {sm.line, sm.column} and {em.line, em.column}")
+            # em = text.end_mark
+            new_line = sm.line + e.line
+            newargs = list(e.args)
+            newargs[0] = e.args[0].replace(f"line {e.line}", f"line {new_line}")
+            e.args = tuple(newargs)
+            e.line = new_line
+
         raise e
 
 
