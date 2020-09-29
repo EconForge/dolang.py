@@ -1,6 +1,5 @@
 import numpy as np
 
-from dolo.numeric.discretization import tensor_markov
 
 class NumericEval:
 
@@ -91,82 +90,85 @@ class NumericEval:
 ### Mini language example
 ###
 
-TensorMarkov = tensor_markov
 
-def Normal(a):
-    return a
+# def TensorMarkov(*args, **kwargs):
+#     from dolo.numeric.discretization import tensor_markov
+#     return tensor_markov(*args, **kwargs)
 
-def Approximation(**kwargs):
-    return {'approximation_space': kwargs}
+# def Normal(a):
+#     return a
 
-def rouwenhorst(rho=None, sigma=None, N=None):
-    from dolo.numeric.discretization import rouwenhorst
-    return rouwenhorst(rho,sigma,N)
+# def Approximation(**kwargs):
+#     return {'approximation_space': kwargs}
 
-def AR1(rho, sigma, *pargs, **kwargs):
-    rho_array = np.array(rho, dtype=float)
-    sigma_array = np.atleast_2d( np.array(sigma, dtype=float) )
-    try:
-        assert(rho_array.ndim<=1)
-    except:
-        raise Exception("When discretizing a Vector AR1 process, the autocorrelation coefficient must be as scalar. Found: {}".format(rho_array))
-    try:
-        assert(sigma_array.shape[0] == sigma_array.shape[1])
-    except:
-        raise Exception("The covariance matrix for a Vector AR1 process must be square. Found: {}".format())
-    from dolo.numeric.discretization import multidimensional_discretization
-    [P,Q] = multidimensional_discretization(rho_array, sigma_array, *pargs, **kwargs)
-    return P,Q
+# def rouwenhorst(rho=None, sigma=None, N=None):
+#     from dolo.numeric.discretization import rouwenhorst
+#     return rouwenhorst(rho,sigma,N)
 
-def MarkovChain(a,b):
-    return [a,b]
+# def AR1(rho, sigma, *pargs, **kwargs):
+#     rho_array = np.array(rho, dtype=float)
+#     sigma_array = np.atleast_2d( np.array(sigma, dtype=float) )
+#     try:
+#         assert(rho_array.ndim<=1)
+#     except:
+#         raise Exception("When discretizing a Vector AR1 process, the autocorrelation coefficient must be as scalar. Found: {}".format(rho_array))
+#     try:
+#         assert(sigma_array.shape[0] == sigma_array.shape[1])
+#     except:
+#         raise Exception("The covariance matrix for a Vector AR1 process must be square. Found: {}".format())
+#     from dolo.numeric.discretization import multidimensional_discretization
+#     [P,Q] = multidimensional_discretization(rho_array, sigma_array, *pargs, **kwargs)
+#     return P,Q
 
-supported_functions = [AR1, TensorMarkov, MarkovChain, Normal, Approximation]
+# def MarkovChain(a,b):
+#     return [a,b]
 
-
-###
-###
-
+# supported_functions = [AR1, TensorMarkov, MarkovChain, Normal, Approximation]
 
 
-# Markov mini language
-
-if __name__ == '__main__':
-
-    import numpy
-
-    from collections import OrderedDict
-    options = OrderedDict(
-        smin= ['x',0.0],
-        smax= ['y','x'],
-        orders= [40,40],
-        markov=dict(a=12.0, b=0.9)
-    )
-
-
-    d = {'x': 0.01, 'y': 10.0}
-    print( NumericEval(d, supported_functions)(options) )
+# ###
+# ###
 
 
 
-        # define a markov chain in yaml
-    txt = '''
-tensor:
+# # Markov mini language
 
-    - rouwenhorst:
-        rho: 0.9
-        sigma: 0.4
-        N: 3
+# if __name__ == '__main__':
 
-    - markov:
-        a: 0.8
-        b: 1.2
+#     import numpy
+
+#     from collections import OrderedDict
+#     options = OrderedDict(
+#         smin= ['x',0.0],
+#         smax= ['y','x'],
+#         orders= [40,40],
+#         markov=dict(a=12.0, b=0.9)
+#     )
+
+
+#     d = {'x': 0.01, 'y': 10.0}
+#     print( NumericEval(d, supported_functions)(options) )
+
+
+
+#         # define a markov chain in yaml
+#     txt = '''
+# tensor:
+
+#     - rouwenhorst:
+#         rho: 0.9
+#         sigma: 0.4
+#         N: 3
+
+#     - markov:
+#         a: 0.8
+#         b: 1.2
 
 
 
 
-    '''
-    import yaml
-    s = yaml.safe_load(txt)
+#     '''
+#     import yaml
+#     s = yaml.safe_load(txt)
 
-    print(NumericEval(d, supported_functions)(s))
+#     print(NumericEval(d, supported_functions)(s))
