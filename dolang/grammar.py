@@ -1,4 +1,4 @@
-from lark.exceptions import LarkError, UnexpectedInput
+from lark.exceptions import LarkError, UnexpectedInput, UnexpectedCharacters
 from yaml import ScalarNode
 
 import copy
@@ -28,7 +28,7 @@ grammar_0 = open(DATA_PATH,'rt').read()
 
 
 from lark.lark import Lark
-parser = Lark(grammar_0, start=['start', 'equation_block', 'assignment_block', 'complementarity_block'])
+parser = Lark(grammar_0, start=['start', 'variable', 'equation_block', 'assignment_block', 'complementarity_block'])
 
 
 def parse_string(text, start=None):
@@ -54,16 +54,23 @@ def parse_string(text, start=None):
     try:
         return parser.parse(txt, start)
 
-    except UnexpectedInput as e:
+    except (UnexpectedInput, UnexpectedCharacters) as e:
 
         if isinstance(text, ScalarNode):
             sm = text.start_mark
             # em = text.end_mark
-            new_line = sm.line + e.line
+            if text.style not in ('>', '|'):
+                new_column = sm.column + e.column
+                new_line = sm.line + e.line
+            else:
+                new_line = sm.line + e.line
+                new_column = e.column
             newargs = list(e.args)
             newargs[0] = e.args[0].replace(f"line {e.line}", f"line {new_line}")
+            newargs[0] = newargs[0].replace(f"col {e.column}", f"col {new_column}")
             e.args = tuple(newargs)
             e.line = new_line
+            e.column = new_column
 
         raise e
 
