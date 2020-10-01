@@ -19,20 +19,13 @@ def tshift(t, n):
 
 def get_atoms(string):
 
-    expr = ast.parse(str.strip(str(string)))
-    parser = FindNames()
-    parser.visit(expr)
-    names = parser.names
-
-    return set(names)
-
-class FindNames(NodeVisitor):
-
-    def __init__(self):
-        self.names = []
-
-    def visit_Name(self, node):
-        self.names.append(node.id)
+    from .symbolic import parse_string, list_symbols
+    if not isinstance(string, str):
+        return set([])
+    expr = parse_string(string)
+    syms = list_symbols(expr)
+    
+    return set(syms.parameters)
 
 def triangular_solver(incidence, context=None):
 
@@ -87,19 +80,18 @@ def get_incidence(sdict):
     return incidence
 
 
-from collections import OrderedDict
-
-
 def solve_triangular_system(system, values=None, context=None):
 
-    system = OrderedDict(system)
+    system = dict(system)
     var_order = list(system.keys())
     ll = get_incidence(system)
+
     sol_order = triangular_solver(ll, context=context)
     d = copy.copy(values) if values else {}
 
     import math
     d['nan'] = float('nan')
+    d['nanj'] = 0 #float('nan')*0j # this is actually (nan+nanj): super strange
     d['exp'] = math.exp
     d['log'] = math.log
     d['sin'] = math.sin
@@ -109,11 +101,13 @@ def solve_triangular_system(system, values=None, context=None):
         v = var_order[i]
         try:
             val = system[v]
-            d[v] = eval(str(val), d, d)
+            s = str(val).replace("^", "**")
+            fv = eval(s, d, d)
+            d[v] = eval(s, d, d)
         except Exception as e:  # in case d[v] is an int
             raise(e)
 
-    resp = OrderedDict([(v, d[v]) for v in system.keys()])
+    resp = dict([(v, d[v]) for v in system.keys()])
     return resp
 
 

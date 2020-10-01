@@ -1,0 +1,35 @@
+symbols:
+    controls: [alpha, beta]
+    states: [hei, ho]
+
+calibration:
+    a: 0.1
+    b: 1
+    
+equations:
+
+    list:
+        - a[t] = a[t-1] + b[t]
+        - a[t] = a[t-1] + 0 b[t] # this one has a bug
+
+    block: |
+
+        β*(c[t+1]/c[t])^(-γ+)*r - 1
+        β*(c[t+1]/c[t])^(-γ)*(r_2[t+1]-r_1[t+1])
+
+    block2: >
+
+        β*(c[t+1]/c[t])^(-γ)*r - 1
+
+
+        β*(c[t+1]/c[t])^(-γ))*(r_2[t+1]-r_1[t+1])
+
+    inline: [a + b*c, x +* y, z+c]
+
+definitions:
+    x[t]: None
+    x[t+1]: None
+    x[t-1]: None
+    x[t+]: [33,  8]
+    x[t1]: [34, 8]
+    x[]: [35, 7]

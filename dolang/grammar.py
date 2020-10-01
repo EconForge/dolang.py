@@ -1,3 +1,7 @@
+from lark.exceptions import LarkError, UnexpectedInput, UnexpectedCharacters
+from yaml import ScalarNode
+
+import copy
 import lark
 from lark.tree import Tree
 from lark.lexer import Token
@@ -16,63 +20,59 @@ from dataclasses import dataclass
 ## v is a prespecified function.
 ## later, this compatibility feature will be turned off.
 
-grammar_0 = """
-    ?start: equation | predicate
+import os
+DIR_PATH, this_filename = os.path.split(__file__)
+DATA_PATH = os.path.join(DIR_PATH, "grammar.lark")
 
-    ?equation: double_complementarity | equality | formula
-    equality: sum "=" sum 
-        | sum "==" sum
-    !inequality: formula ("<="|"<"|">"|">=") formula
-    predicate: [quantifier] (equality | inequality)
-    quantifier: "∀" "t" ","
-    double_inequality: formula "<=" symbol "<=" formula
-        | formula "<=" variable "<=" formula
-    double_complementarity: formula _PERP double_inequality
+grammar_0 = open(DATA_PATH,'rt').read()
 
-
-    _PERP: "⟂" | "|"
-
-    ?formula: sum
-    ?sum: product
-        | sum "+" product   -> add
-        | sum "-" product   -> sub
-    ?product: atom
-        | product "*" atom  -> mul
-        | product "/" atom  -> div
-    ?pow: atom "^" atom
-    ?atom: NUMBER           -> number
-         | "-" atom         -> neg
-         | pow
-         | symbol            
-         | "(" sum ")"
-         | expectation
-         | call
-         | variable
-
-    !symbol: NAME -> symbol
-    expectation: ("E["|"𝔼[") formula "]" -> expectation
-    variable: cname  "[" date_index "]" -> variable
-            | cname "[" "t" "]" -> variable
-            | cname "(" date_index ")" -> variable
-            | cname "[" "t$" subperiod "]"
-    subperiod: INT | NAME
-    !cname: NAME -> name
-    ?date_index: "t" SIGNED_INT2 -> date
-        | SIGNED_INT -> date
-    ?call: FUNCTION "(" sum ")" -> call
-    FUNCTION: "sin"|"cos"|"exp"|"log"
-
-    SIGNED_INT2: ("+"|"-") INT
-    %import common.SIGNED_INT
-    %import common.INT
-    %import common.CNAME -> NAME
-    %import common.NUMBER
-    %import common.WS_INLINE
-    %ignore WS_INLINE
-"""
 
 from lark.lark import Lark
-parser = Lark(grammar_0)
+parser = Lark(grammar_0, start=['start', 'variable', 'equation_block', 'assignment_block', 'complementarity_block'])
+
+
+def parse_string(text, start=None):
+
+    if start is None:
+        start = 'start'
+
+    if isinstance(text, ScalarNode):
+        if text.tag != 'tag:yaml.org,2002:str':
+        #     raise Exception(f"Don't know how to parse node {text}")
+            txt = text.value
+        else:
+            buffer = text.end_mark.buffer
+            i1 = text.start_mark.pointer
+            i2 = text.end_mark.pointer
+            txt = buffer[i1:i2]
+            if text.style in ('>', '|'):
+                txt = txt[1:]
+
+    else:
+        txt = text
+    
+    try:
+        return parser.parse(txt, start)
+
+    except (UnexpectedInput, UnexpectedCharacters) as e:
+
+        if isinstance(text, ScalarNode):
+            sm = text.start_mark
+            # em = text.end_mark
+            if text.style not in ('>', '|'):
+                new_column = sm.column + e.column
+                new_line = sm.line + e.line
+            else:
+                new_line = sm.line + e.line
+                new_column = e.column
+            newargs = list(e.args)
+            newargs[0] = e.args[0].replace(f"line {e.line}", f"line {new_line}")
+            newargs[0] = newargs[0].replace(f"col {e.column}", f"col {new_column}")
+            e.args = tuple(newargs)
+            e.line = new_line
+            e.column = new_column
+
+        raise e
 
 
 # Prints a tree as a string
@@ -128,6 +128,12 @@ class Printer(Interpreter):
         c = self.visit(tree.children[2])
         return f"{a} <= {b} <= {c}"
 
+    def assignment(self, tree):
+        a = self.visit(tree.children[0])
+        b = self.visit(tree.children[1])
+        return f"{a} = {b}"
+
+
     def symbol(self, tree):
         name = tree.children[0].value
         return (name)
@@ -169,6 +175,9 @@ class Printer(Interpreter):
             return "∀t, " + self.visit(tree.children[1])
 
 
+def create_variable(name, time):
+    return Tree("variable", [Tree("name", [Token("NAME", name)]), Tree("date", [Token("NUMBER", str(time))])])
+
 
 ## replaces v[t] by v[t+0] (I didn't find how to do it in the grammar)
 ## replaces v by v[t] when v identified as a variable
@@ -190,6 +199,14 @@ class Sanitizer(Transformer):
             date = Tree('date',[Token("NUMBER", '0')])
             args = (args[0] + [date], )
         return Tree("variable", *args)
+
+
+## removes timing (replace v[t], v[t-1] or v[t+1] by v)
+class TimeRemover(Transformer):
+
+    def variable(self, args):
+        name = args[0].children[0].value
+        return Tree("symbol", [Token("NAME", name)])
 
 def stringify_variable(arg: Tuple[str, int]) -> str:
     s = arg[0]
@@ -321,7 +338,7 @@ def subs(expr: str, substitutions):
     s = dict()
     f = expr
     for k,v in substitutions.items():
-        s[k] = parser.parse(v)
+        s[k] = parser.parse(v, start='start')
     ns = NameSubstituter(s)
     res = ns.transform(f)
     return str_expression(res)
@@ -339,7 +356,7 @@ def expression_or_string(f):
         if not isinstance(args[0], str):
             return f(*args, **kwds)
         else:
-            a = parser.parse(args[0])
+            a = parser.parse(args[0], start='start')
             nargs = tuple([a]) + args[1:]
             res = f(*nargs, **kwds)
             return str_expression(res)
@@ -368,11 +385,15 @@ def sanitize(expr: Expression, variables=[]):
     return Sanitizer(variables=variables).transform(expr)
     
 
+@expression_or_string
+def remove_timing(expr: Expression):
+    return TimeRemover().transform(expr)
+    
 
 def list_symbols(expr: Union[Expression,str]) -> SymbolList:
 
     if isinstance(expr, str):
-        expr = parser.parse(str)
+        expr = parser.parse(str, start='start')
 
     ll = VariablesLister()
     ll.visit(expr)

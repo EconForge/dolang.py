@@ -2,10 +2,7 @@ from typing import List, Dict, Tuple
 import ast
 from ast import NodeTransformer, Call
 
-try:
-    from .dataclasses import dataclass
-except:
-    from dataclasses import dataclass
+from dataclasses import dataclass
 
 
 from dolang.codegen import to_source

@@ -35,6 +35,13 @@ def test_parsing():
     e = parse_string(s)
     print( str_expression(e) )
 
+def test_parsing_unicode():
+
+    from dolang.symbolic import parse_string
+    s = "αα"
+    e = parse_string(s)
+    print(e)
+
 def test_expectation():
     from dolang.symbolic import parse_string
     s = "𝔼[ (x[t+1] / x[t]) ]"
@@ -50,6 +57,14 @@ def test_parse_string():
     s = to_source(e)
     assert (s == "sin(a[t+1] + b + f[t+1] + f[t+4] + a[t+1])")
 
+
+def test_remove_timing():
+    from dolang.symbolic import parse_string, remove_timing
+    e = parse_string('sin(a(1)+b+f(1)+f(4)+a[t+1])')
+    assert isinstance(e, Tree)
+    s = to_source(e)
+    rr = (remove_timing(s))
+    assert (rr == "sin(a + b + f + f + a)")
 
 
 def test_predicate():
