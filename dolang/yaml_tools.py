@@ -41,6 +41,11 @@ MappingNode.__getitem__ = lambda self, key: self.value[self.keys().index(key)][1
 MappingNode.__contains__ = lambda self, key: (key in self.keys())
 MappingNode.__len__ = lambda self: len(self.value)
 
+def __mn_update__(self, kw):
+    for k,w in kw.items():
+        self[k] = w
+MappingNode.update = __mn_update__
+
 SequenceNode.__getitem__ = lambda self, i: self.value[i]
 SequenceNode.__len__ = lambda self: len(self.value)
 SequenceNode.__iter__ = lambda self: iter(self.value)

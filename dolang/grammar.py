@@ -41,12 +41,16 @@ def parse_string(text, start=None):
         #     raise Exception(f"Don't know how to parse node {text}")
             txt = text.value
         else:
-            buffer = text.end_mark.buffer
-            i1 = text.start_mark.pointer
-            i2 = text.end_mark.pointer
-            txt = buffer[i1:i2]
-            if text.style in ('>', '|'):
-                txt = txt[1:]
+            if text.start_mark is None:
+                txt = text.value
+            else:
+                buffer = text.end_mark.buffer
+                i1 = text.start_mark.pointer
+                i2 = text.end_mark.pointer
+                txt = buffer[i1:i2]
+                if text.style in ('>', '|'):
+                    txt = txt[1:]
+
 
     else:
         txt = text
