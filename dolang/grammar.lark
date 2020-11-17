@@ -3,7 +3,7 @@
 ?equation: double_complementarity | equality | formula
 
 equation_block: _NEWLINE? (equation) (_NEWLINE equation )* _NEWLINE?
-complementarity_block: _NEWLINE? (double_complementarity | formula) (_NEWLINE double_complementarity | formula )* _NEWLINE?
+complementarity_block: _NEWLINE? (double_complementarity | formula) (_NEWLINE double_complementarity | _NEWLINE formula )* _NEWLINE?
 assignment_block: _NEWLINE? assignment (_NEWLINE assignment )* _NEWLINE?
 
 assignment: variable "=" formula

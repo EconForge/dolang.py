@@ -67,6 +67,12 @@ def test_remove_timing():
     assert (rr == "sin(a + b + f + f + a)")
 
 
+def test_multiline():
+    from dolang.symbolic import parse_string
+    e = parse_string("a ⟂ x <= y <= exp(z)\nb ⟂ x <= y <= z", start="complementarity_block")
+    assert(len(e.children)==2)
+    
+
 def test_predicate():
     from dolang.symbolic import parse_string, str_expression
     e = parse_string('a[t] <= (x[t]+b)')
