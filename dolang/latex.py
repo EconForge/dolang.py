@@ -329,6 +329,11 @@ def expr2tex(variables, s):
 def eq2tex(variables, s):
 
     expr = s.replace('==', '=').replace('=','==')
+    
+    # TEMP FIX
+    expr = expr.replace("[t]", "").replace('[t+1]', "(1)").replace('[t-1]','(-1)')
+    expr = expr.replace("^", "**")
+
     if '==' in expr:
         lhs, rhs = [expr2tex(variables,str.strip(e)) for e in str.split(expr,'==')]
         return "{} = {}".format(lhs, rhs)
