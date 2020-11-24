@@ -6,3 +6,4 @@ client_id
 *__pycache__*
 poetry.lock
 dolang.egg-info
+setup.py
