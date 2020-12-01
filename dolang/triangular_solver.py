@@ -5,7 +5,9 @@ from ast import NodeVisitor
 from .symbolic import eval_scalar
 
 
-def parse(s): return ast.parse(s).body[0].value
+def parse(s):
+    return ast.parse(s).body[0].value
+
 
 def unique(seq):
     seen = set()
@@ -14,18 +16,22 @@ def unique(seq):
             seen.add(item)
             yield item
 
+
 def tshift(t, n):
-    return (t[0], t[1]+n)
+    return (t[0], t[1] + n)
+
 
 def get_atoms(string):
 
     from .symbolic import parse_string, list_symbols
+
     if not isinstance(string, str):
         return set([])
     expr = parse_string(string)
     syms = list_symbols(expr)
-    
+
     return set(syms.parameters)
+
 
 def triangular_solver(incidence, context=None):
 
@@ -33,9 +39,10 @@ def triangular_solver(incidence, context=None):
 
         context = dict()
         import math
-        context['log'] = math.log
-        context['exp'] = math.exp
-        context['nan'] = float('nan')
+
+        context["log"] = math.log
+        context["exp"] = math.exp
+        context["nan"] = float("nan")
 
     n = len(incidence)
 
@@ -47,8 +54,9 @@ def triangular_solver(incidence, context=None):
 
     while (steps < max_steps) and len(solved) < n:
 
-        possibilities = [i for i in range(n) if (
-            i not in solved) and (len(current[i]) == 0)]
+        possibilities = [
+            i for i in range(n) if (i not in solved) and (len(current[i]) == 0)
+        ]
 
         for i in possibilities:
             for e in current:
@@ -59,7 +67,7 @@ def triangular_solver(incidence, context=None):
         steps += 1
 
     if len(solved) < n:
-        raise Exception('System is not triangular')
+        raise Exception("System is not triangular")
     return solved
 
 
@@ -90,12 +98,13 @@ def solve_triangular_system(system, values=None, context=None):
     d = copy.copy(values) if values else {}
 
     import math
-    d['nan'] = float('nan')
-    d['nanj'] = 0 #float('nan')*0j # this is actually (nan+nanj): super strange
-    d['exp'] = math.exp
-    d['log'] = math.log
-    d['sin'] = math.sin
-    d['cos'] = math.cos
+
+    d["nan"] = float("nan")
+    d["nanj"] = 0  # float('nan')*0j # this is actually (nan+nanj): super strange
+    d["exp"] = math.exp
+    d["log"] = math.log
+    d["sin"] = math.sin
+    d["cos"] = math.cos
 
     for i in sol_order:
         v = var_order[i]
@@ -105,7 +114,7 @@ def solve_triangular_system(system, values=None, context=None):
             fv = eval(s, d, d)
             d[v] = eval(s, d, d)
         except Exception as e:  # in case d[v] is an int
-            raise(e)
+            raise (e)
 
     resp = dict([(v, d[v]) for v in system.keys()])
     return resp
@@ -114,7 +123,7 @@ def solve_triangular_system(system, values=None, context=None):
 def get_deps(incidence, var, visited=None):
 
     # assert(var in incidence)
-    assert(isinstance(var, tuple) and len(var) == 2)
+    assert isinstance(var, tuple) and len(var) == 2
 
     if visited is None:
         visited = (var,)
@@ -125,7 +134,9 @@ def get_deps(incidence, var, visited=None):
 
     n = var[1]
     if abs(n) > 20:
-        raise Exception("Found variable with time {}. Something has probably gone wrong.".format(n))
+        raise Exception(
+            "Found variable with time {}. Something has probably gone wrong.".format(n)
+        )
 
     deps = incidence[(var[0], 0)]
     if n != 0:
@@ -138,17 +149,13 @@ def get_deps(incidence, var, visited=None):
     return resp
 
 
-
 def test_triangular_solution():
 
-    d = {
-        'a': 0.1,
-        'b': 'a + 3',
-        'c': 'a + b'
-    }
+    d = {"a": 0.1, "b": "a + 3", "c": "a + b"}
     sol = solve_triangular_system(d)
     for v in sol.values():
-        assert( isinstance(v, float))
+        assert isinstance(v, float)
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     test_triangular_solution()

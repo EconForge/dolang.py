@@ -2,6 +2,7 @@ from .grammar import *
 
 import ast
 
+
 def eval_scalar(tree):
     try:
         if isinstance(tree, ast.Num):
@@ -13,4 +14,3 @@ def eval_scalar(tree):
             raise Exception("Don't know how to do that.")
     except:
         raise Exception("Don't know how to do that.")
-

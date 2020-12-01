@@ -34,9 +34,10 @@ class FlatFunctionFactory:
         return txt
 
 
-def stack_arguments(ff: FlatFunctionFactory, varname: str = 'v'):
+def stack_arguments(ff: FlatFunctionFactory, varname: str = "v"):
     import operator
     import functools
+
     args_k = [*ff.arguments.keys()]
     args_v = [*ff.arguments.values()]
     arguments = dict()
@@ -50,6 +51,7 @@ def substitute_preamble(ff: FlatFunctionFactory):
     import dolang
     import copy
     from .symbolic import NameSubstituter
+
     pr = copy.copy(ff.preamble)
     for k in pr.keys():
         pr[k] = dolang.parse_string(pr[k])
@@ -68,8 +70,9 @@ def get_symbolic_derivatives(fff: FlatFunctionFactory, max_order=1):
     svars = [symlib.sympify(v) for v in fff.arguments[varname]]
 
     derivatives_sym = dict()
-    derivatives_sym[0] = dict(((i, ), symlib.sympify(eq))
-                              for i, eq in enumerate(fff.content.values()))
+    derivatives_sym[0] = dict(
+        ((i,), symlib.sympify(eq)) for i, eq in enumerate(fff.content.values())
+    )
 
     incidences = dict()
     incidence = dict()
@@ -79,7 +82,7 @@ def get_symbolic_derivatives(fff: FlatFunctionFactory, max_order=1):
         for (j, at) in enumerate(svars):
             if at in ats:
                 l.append((j, at))
-        incidence[(i, )] = l
+        incidence[(i,)] = l
 
     incidences[0] = incidence
 
@@ -99,7 +102,7 @@ def get_symbolic_derivatives(fff: FlatFunctionFactory, max_order=1):
             for k, s in syms:
                 if k >= m:
                     deq = eq.diff(s)
-                    ind = eq_d + (k, )
+                    ind = eq_d + (k,)
                     deriv[ind] = deq
                     # ats = deq.atoms()
                     incs[ind] = [e for e in syms if e[1] in deq.atoms()]
