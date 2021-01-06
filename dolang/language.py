@@ -84,11 +84,9 @@ def eval_data(data: "yaml_structure", calibration={}):
 
     import warnings
     from yaml import MappingNode, SequenceNode, ScalarNode
-
-    import math
+    
     d = calibration.copy()
-    d['log'] = math.log
-    d['exp'] = math.exp
+    d.update(functions)
 
     if isinstance(data, ScalarNode):
 
@@ -99,8 +97,6 @@ def eval_data(data: "yaml_structure", calibration={}):
         elif isinstance(val, str):
             # could be a string, could be an expression, could depend on other sections
             try:
-                print(val)
-                print(d)
                 val = eval(val.replace("^", "**"), d)
             except Exception as e:
                 warnings.warn(f"Impossible to evaluate expression: {val}")
