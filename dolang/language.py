@@ -84,7 +84,7 @@ def eval_data(data: "yaml_structure", calibration={}):
 
     import warnings
     from yaml import MappingNode, SequenceNode, ScalarNode
-    
+
     d = calibration.copy()
     d.update(functions)
 
