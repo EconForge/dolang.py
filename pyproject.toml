@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "dolang"
-version = "0.0.12"
+version = "0.0.13"
 description = "Dolo Modeling Language"
 readme = "README.md"
 authors = ["Winant Pablo <pablo.winant@gmail.com>"]
