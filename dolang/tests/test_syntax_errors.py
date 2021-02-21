@@ -7,7 +7,7 @@ def test_syntax_errors():
     DIR_PATH, this_filename = os.path.split(__file__)
     DATA_PATH = os.path.join(DIR_PATH, "syntax_errors.yaml")
 
-    txt = open(DATA_PATH, "rt").read()
+    txt = open(DATA_PATH, "rt", encoding="utf-8").read()
     data = yaml.compose(txt)
 
     try:
@@ -45,7 +45,7 @@ def test_variable_definitions_errors():
     DIR_PATH, this_filename = os.path.split(__file__)
     DATA_PATH = os.path.join(DIR_PATH, "syntax_errors.yaml")
 
-    txt = open(DATA_PATH, "rt").read()
+    txt = open(DATA_PATH, "rt", encoding="utf-8").read()
     data = yaml.compose(txt)
 
     for v in (data["definitions"]).value:

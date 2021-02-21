@@ -12,7 +12,7 @@ def test_symbols():
         BOLD = "\033[1m"
         UNDERLINE = "\033[4m"
 
-    txt = yaml.safe_load(open("tests/symbols.yaml"))
+    txt = yaml.safe_load(open("tests/symbols.yaml", encoding="utf-8"))
 
     summary = []
     for short_sym, long_sym in txt["symbols"].items():
