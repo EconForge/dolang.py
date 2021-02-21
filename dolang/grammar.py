@@ -26,7 +26,7 @@ import os
 DIR_PATH, this_filename = os.path.split(__file__)
 DATA_PATH = os.path.join(DIR_PATH, "grammar.lark")
 
-grammar_0 = open(DATA_PATH, "rt").read()
+grammar_0 = open(DATA_PATH, "rt", encoding="utf-8").read()
 
 
 from lark.lark import Lark

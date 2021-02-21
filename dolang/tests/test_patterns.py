@@ -14,7 +14,7 @@ def test_patterns():
         BOLD = "\033[1m"
         UNDERLINE = "\033[4m"
 
-    tests = yaml.safe_load(open("tests/patterns.yaml"))
+    tests = yaml.safe_load(open("tests/patterns.yaml", encoding="utf-8"))
 
     pattern_tests = tests["patterns"]
 
