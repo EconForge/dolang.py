@@ -7,3 +7,4 @@ client_id
 poetry.lock
 dolang.egg-info
 setup.py
+.venv/*
