@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "dolang"
-version = "0.0.16"
+version = "0.0.17"
 description = "Dolo Modeling Language"
 readme = "README.md"
 authors = ["Winant Pablo <pablo.winant@gmail.com>"]
@@ -8,7 +8,7 @@ license="BSD-2-Clause"
 
 [tool.poetry.dependencies]
 python = ">=3.8,<3.11"
-numba = "^0.55"
+numba = "^0.55.0"
 numpy = "^1.22.2"
 sympy = "^1.5.1"
 lark-parser = "^0.12.0"
