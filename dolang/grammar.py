@@ -1,4 +1,5 @@
-from lark.exceptions import LarkError, UnexpectedInput, UnexpectedCharacters
+from hashlib import new
+from lark.exceptions import LarkError, UnexpectedInput, ConfigurationError, UnexpectedCharacters
 from yaml import ScalarNode
 
 import copy
@@ -35,6 +36,7 @@ parser = Lark(
     grammar_0,
     start=[
         "start",
+        "equation",
         "variable",
         "equation_block",
         "assignment_block",
@@ -69,9 +71,12 @@ def parse_string(text, start=None):
     try:
         return parser.parse(txt, start)
 
+
+
     except (UnexpectedInput, UnexpectedCharacters) as e:
 
         if isinstance(text, ScalarNode):
+
             sm = text.start_mark
             # em = text.end_mark
             if text.style not in (">", "|"):
@@ -80,10 +85,10 @@ def parse_string(text, start=None):
             else:
                 new_line = sm.line + e.line
                 new_column = e.column
-            newargs = list(e.args)
-            newargs[0] = e.args[0].replace(f"line {e.line}", f"line {new_line}")
-            newargs[0] = newargs[0].replace(f"col {e.column}", f"col {new_column}")
-            e.args = tuple(newargs)
+            # newargs = list(e.args)
+            # newargs[0] = e.args[0].replace(f"line {e.line}", f"line {new_line}")
+            # newargs[0] = newargs[0].replace(f"col {e.column}", f"col {new_column}")
+            # e.args = tuple(newargs)
             e.line = new_line
             e.column = new_column
 

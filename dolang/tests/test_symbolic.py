@@ -1,4 +1,5 @@
 import ast
+import dolang
 from dolang.grammar import str_expression as to_source
 from dolang.symbolic import stringify, list_variables, list_symbols
 from dolang.grammar import Tree

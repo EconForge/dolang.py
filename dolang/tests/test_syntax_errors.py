@@ -10,6 +10,7 @@ def test_syntax_errors():
     txt = open(DATA_PATH, "rt", encoding="utf-8").read()
     data = yaml.compose(txt)
 
+
     try:
         parse_string(data["equations"]["list"][1], start="equation")
     except Exception as e:
@@ -34,6 +35,7 @@ def test_syntax_errors():
         assert e.line == 27
         assert e.column == 26
 
+test_syntax_errors()
 
 def test_variable_definitions_errors():
 
