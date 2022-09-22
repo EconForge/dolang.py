@@ -1,5 +1,10 @@
 from hashlib import new
-from lark.exceptions import LarkError, UnexpectedInput, ConfigurationError, UnexpectedCharacters
+from lark.exceptions import (
+    LarkError,
+    UnexpectedInput,
+    ConfigurationError,
+    UnexpectedCharacters,
+)
 from yaml import ScalarNode
 
 import copy
@@ -70,8 +75,6 @@ def parse_string(text, start=None):
 
     try:
         return parser.parse(txt, start)
-
-
 
     except (UnexpectedInput, UnexpectedCharacters) as e:
 
