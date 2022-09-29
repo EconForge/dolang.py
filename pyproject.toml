@@ -10,9 +10,8 @@ license="BSD-2-Clause"
 python = ">=3.8,<3.11"
 numba = "^0.55.0"
 numpy = "^1.22.2"
-sympy = "^1.5.1"
-lark-parser = "^0.12.0"
-lark = "^1.1.1"
+sympy = "^1.11.1"
+lark = "^1.1.2"
 pytest = "^7.1.3"
 
 [tool.poetry.group.dev.dependencies]
@@ -26,5 +25,5 @@ coverage = "^5.3"
 pytest-cov = "^2.10.1"
 
 [build-system]
-requires = ["poetry>=0.12"]
+requires = ["poetry>=1.2.1"]
 build-backend = "poetry.masonry.api"

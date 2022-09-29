@@ -128,7 +128,7 @@ def eval_data(data: "yaml_structure", calibration={}):
 
     elif isinstance(data, MappingNode):
 
-        if (data.tag is not "tag:yaml.org,2002:map") and data.tag == "!Function":
+        if (data.tag != "tag:yaml.org,2002:map") and data.tag == "!Function":
             return eval_function(data, calibration)
 
         tag = data.tag
