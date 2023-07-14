@@ -22,6 +22,7 @@ def test_compiler():
     assert abs(out[0] - 4.45168907) < 1e-8
     assert abs(out[1] - 8.2) < 1e-8
 
+
 def test_compiler_2():
     from dolang.factory import FlatFunctionFactory
     from dolang.codegen import to_source

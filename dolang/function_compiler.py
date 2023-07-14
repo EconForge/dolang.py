@@ -123,9 +123,9 @@ def make_method_from_factory(
 
     fun = eval_ast(mod)
 
-
     if compile:
         from numba import jit, guvectorize
+
         jfun = jit(fun, nopython=True)
         if vectorize:
             gufun = guvectorize([fty], signature, target="parallel", nopython=True)(fun)
