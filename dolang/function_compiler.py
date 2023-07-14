@@ -98,7 +98,7 @@ def compile_factory(fff: FlatFunctionFactory):
 
 
 def make_method_from_factory(
-    fff: FlatFunctionFactory, vectorize=True, use_file=False, debug=False
+    fff: FlatFunctionFactory, vectorize=True, use_file=False, debug=False, compile=True
 ):
     mod = compile_factory(fff)
 
@@ -123,14 +123,17 @@ def make_method_from_factory(
 
     fun = eval_ast(mod)
 
-    from numba import jit, guvectorize
 
-    jitted = jit(fun, nopython=True)
-    if vectorize:
-        gufun = guvectorize([fty], signature, target="parallel", nopython=True)(fun)
-        return jitted, gufun
+    if compile:
+        from numba import jit, guvectorize
+        jfun = jit(fun, nopython=True)
+        if vectorize:
+            gufun = guvectorize([fty], signature, target="parallel", nopython=True)(fun)
+            return jfun, gufun
     else:
-        return jitted
+        jfun = fun
+
+    return jfun
 
 
 def eval_ast(mod):
@@ -139,7 +142,6 @@ def eval_ast(mod):
     import numpy
 
     context["inf"] = numpy.inf
-
     context["exp"] = numpy.exp
     context["log"] = numpy.log
     context["sin"] = numpy.sin
