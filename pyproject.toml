@@ -25,12 +25,6 @@ coverage = "^5.3"
 pytest-cov = "^2.10.1"
 numba = "^0.57.1"
 
-[tool.poetry.extras]
-caching = ["numba"]
-
-[tool.poetry.group.extras.dependencies]
-pytest = "^7.4.0"
-
 [build-system]
 requires = ["poetry>=1.2.1"]
 build-backend = "poetry.masonry.api"
