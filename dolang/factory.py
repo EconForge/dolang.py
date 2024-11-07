@@ -79,7 +79,7 @@ def get_symbolic_derivatives(fff: FlatFunctionFactory, max_order=1):
     for i, eq in enumerate(eqs):
         ats = eq.atoms()
         l = []
-        for (j, at) in enumerate(svars):
+        for j, at in enumerate(svars):
             if at in ats:
                 l.append((j, at))
         incidence[(i,)] = l

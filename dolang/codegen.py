@@ -4,6 +4,7 @@ Extension to ast that allow ast -> python code generation.
 :copyright: Copyright 2008 by Armin Ronacher. Mofified by Pablo Winant.
 :license: BSD.
 """
+
 from ast import *
 
 BINOP_SYMBOLS = {}

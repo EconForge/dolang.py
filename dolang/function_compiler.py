@@ -38,7 +38,7 @@ def compile_factory(fff: FlatFunctionFactory):
 
     body = []
 
-    for (k, neq) in fff.preamble.items():
+    for k, neq in fff.preamble.items():
         tree = parse_string(neq)
         val = tree_to_ast(tree).value
         line = Assign(targets=[Name(id=k, ctx=Store())], value=val)
