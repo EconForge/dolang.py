@@ -34,6 +34,7 @@ DATA_PATH = os.path.join(DIR_PATH, "grammar.lark")
 
 grammar_0 = open(DATA_PATH, "rt", encoding="utf-8").read()
 
+# from .grammar_lark import grammar_0
 
 from lark.lark import Lark
 

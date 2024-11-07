@@ -1,40 +1,47 @@
-{% set version = "0.0.7" %}
-# {% set sha256 = "2debe8a5fc000668edbf1b16bdc8de6e8830047bc3f3ffcb2a5636c16137b004" %}
+{% set name = "dolang" %}
+{% set version = "0.0.20" %}
 
 package:
   name: dolang
-  version: {{ version }}
+  version: 0.0.20
 
 source:
   path: ../
-  #  fn: master.tar.gz
-  #  url: https://github.com/EconForge/dolang.py/archive/master.tar.gz
-
-  # url: https://github.com/EconForge/dolang.py/archive/v{{ version }}.tar.gz
-  # sha256: {{ sha256 }}
 
 build:
-  script: pip install --no-deps .
-  number: 0
+  number: 2
+  noarch: python
+  script: "{{ PYTHON }} -m pip install . -vv"
+  always_include_files:
+    - dolang/grammar.lark
 
 requirements:
-  build:
-    - python
-    - setuptools
+  host:
+    - pip
+    - python >=3.8,<3.11
+    - poetry
   run:
-    - python >= 3.6
-    - python
-    - numba
-    - sympy
+    # numba is now an optional dependency
+    # - numba >=0.57.1
+    - numpy >=1.22.2
+    - python >=3.8, <3.12
+    - sympy >=1.11.1
+    - pyyaml >=6.0
+    - lark >=1.1.2
 
 test:
   imports:
     - dolang
+    - dolang.tests
 
 about:
-  home: https://github.com/econforge/Dolang
-  license: BSD 2-Clause
-  summary: 'Dolo Modeling Language'
+  home: https://github.com/EconForge/dolang.py
+  license: BSD-2-Clause
+  license_family: BSD
+  # in the future, don't include the license file
+  # as it will be part of the source distribution
+  # cf: https://github.com/EconForge/dolang.py/issues/3
+  summary: Dolo Modeling Language
 
 extra:
   recipe-maintainers:
