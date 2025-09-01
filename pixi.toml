@@ -1,0 +1,68 @@
+[workspace]
+authors = ["Pablo Winant <pablo.winant@gmail.com>","Ousema Bouaneni <ousema.bouaneni@polytechnique.edu>"]
+description = "Dolo Modeling Language"
+channels = ["conda-forge"]
+preview = ["pixi-build"]
+platforms = ["linux-64"]
+
+[package]
+name = "dolang"
+version = "0.0.21"
+
+[dependencies]
+dolang = { path = "." }
+
+[package.run-dependencies]
+python = ">=3.9,<3.13"
+numpy = ">=2.2.6,<3"
+sympy = ">=1.14.0,<2"
+lark = ">=1.2.2,<2"
+pyyaml = ">=6.0.2,<7"
+numba = ">=0.61.2,<0.62"
+# add optional numba
+
+[package.build]
+backend = { name = "pixi-build-python", version = "==0.3.2" }
+
+[package.host-dependencies] 
+hatchling = "==1.26.3"
+python = "<3.13,>=3.10"
+
+[feature.test.dependencies]
+pytest = ">=8.3.3"
+coverage = ">=6.4.4"
+pytest-cov = ">=4.0.0"
+
+[feature.test.tasks]
+test = "pytest"
+durations = "pytest --durations=0 -vv"
+cov = "pytest --cov=./ --cov-report=xml"
+
+[feature.lint.dependencies]
+mypy = ">=1.0.0"
+pandas-stubs = ">=2.2.2"
+scipy-stubs = ">=1.12.0"
+types-mock = ">=5.0.0.0"
+types-pyyaml = ">=6.0.12"
+black = ">=24.10.0"
+
+[feature.lint.tasks]
+typecheck = "mypy dolang --ignore-missing-imports"
+black = "black"
+ci-qc = "black . --check"
+
+[feature.docs.dependencies]
+mkdocs = ">=1.6.1"
+mkdocstrings-python = ">=1.16.0"
+mkdocs-material = ">=9.6.0"
+pymdown-extensions = ">=10.12"
+python-markdown-math = ">=0.8"
+
+[feature.docs.tasks]
+docs = "mkdocs serve"
+
+
+[environments]
+prod = []
+test = ["test"]
+dev = ["test", "lint", "docs"]

@@ -7,4 +7,6 @@ client_id
 poetry.lock
 dolang.egg-info
 setup.py
-.venv/*
+.venv/*# pixi environments
+.pixi/*
+!.pixi/config.toml
