@@ -1,5 +1,5 @@
 [workspace]
-authors = ["Pablo Winant <pablo.winant@gmail.com>","Ousema Bouaneni <ousema.bouaneni@polytechnique.edu>"]
+authors = ["Pablo Winant <pablo.winant@gmail.com>"]
 description = "Dolo Modeling Language"
 channels = ["conda-forge"]
 preview = ["pixi-build"]
@@ -10,10 +10,10 @@ name = "dolang"
 version = "0.0.21"
 
 [dependencies]
-dolang = { path = "." }
+dolang = { path = "."}
+interegular = ">=0.3.3,<0.4"
 
 [package.run-dependencies]
-python = ">=3.9,<3.13"
 numpy = ">=2.2.6,<3"
 sympy = ">=1.14.0,<2"
 lark = ">=1.2.2,<2"
@@ -63,6 +63,5 @@ docs = "mkdocs serve"
 
 
 [environments]
-prod = []
 test = ["test"]
 dev = ["test", "lint", "docs"]
