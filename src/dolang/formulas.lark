@@ -1,0 +1,50 @@
+?start: formula
+
+equation_block: _NEWLINE? (equation) (_NEWLINE equation )* _NEWLINE?
+
+?equation: equality | formula
+
+equality: formula "=" formula
+
+?formula: sum
+
+?sum: product
+    | sum "+" product   -> add
+    | sum "-" product   -> sub
+    | "-" product         -> neg
+?product: atom|pow
+    | product "*" (atom|pow)  -> mul
+    | product "/" (atom|pow)  -> div
+?pow: atom _POW atom -> pow
+
+_POW: "^" | "**"
+
+?atom: NUMBER           -> number
+        | constant            
+        | "(" sum ")"
+        | call
+        | variable
+
+!constant: NAME -> constant
+
+variable: cname  "[" date_index  "]" -> variable
+
+!cname: NAME -> name
+
+?date_index: "t" [SIGNED_INT2] -> date
+    
+?call: cname "(" formula ")" -> call
+
+SIGNED_INT2: ("+"|"-") INT
+
+_NEWLINE: NEWLINE
+UNICODE_LETTER: /[^\W\d_\$]/
+NAME: UNICODE_LETTER ("_"|UNICODE_LETTER|DIGIT)*
+
+%import common.SIGNED_INT
+%import common.DIGIT
+%import common.INT
+%import common.NUMBER
+%import common.WS_INLINE
+%import common.NEWLINE
+%ignore WS_INLINE

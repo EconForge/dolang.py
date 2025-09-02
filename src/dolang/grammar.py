@@ -34,6 +34,12 @@ DATA_PATH = os.path.join(DIR_PATH, "grammar.lark")
 
 grammar_0 = open(DATA_PATH, "rt", encoding="utf-8").read()
 
+F_PATH = os.path.join(DIR_PATH, "formulas.lark")
+
+grammar_f = open(F_PATH, "rt", encoding="utf-8").read()
+
+
+
 # from .grammar_lark import grammar_0
 
 from lark.lark import Lark
@@ -48,6 +54,27 @@ parser = Lark(
         "assignment_block",
         "complementarity_block",
     ],
+)
+
+### replaces date with 0 when missing
+class TimeFixer(Transformer):
+
+    def date(self, args):
+        if args[0] is None:
+            return Tree("date", [Token("NUMBER", "0")])
+        else:
+            return Tree("date", [Token("NUMBER", args[0])])
+
+
+parser_f = Lark(
+    grammar_f,
+    start=[
+        "formula",
+        "equation_block"
+    ],
+    parser="lalr",
+    strict=True,
+    transformer=TimeFixer()
 )
 
 
